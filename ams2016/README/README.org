@@ -1,9 +1,9 @@
-#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t c:nil
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:t c:nil
 #+OPTIONS: creator:nil d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t
-#+OPTIONS: num:nil p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t timestamp:t
+#+OPTIONS: num:t p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t timestamp:t
 #+OPTIONS: title:t toc:t todo:t |:t
-#+TITLE: AMS 2016: UniCloud
-#+DATE: <2015-12-07 Mon>
+#+TITLE: AMS 2016: UniCloud, Docker at Unidata
+#+DATE: <2015-12-08 Tue>
 #+AUTHOR: Julien Chastang
 #+EMAIL: chastang@ucar.edu
 #+LANGUAGE: en
@@ -12,9 +12,8 @@
 #+CREATOR: Emacs 24.5.1 (Org mode 8.3.2)
 
 #+SETUPFILE: theme-readtheorg.setup
-*  Microsoft Azure VM with LDM, TDS, and RAMADDA
+*  LDM, TDS, and RAMADDA on Microsoft Azure VM
 :PROPERTIES:
-
 :END:
 ** Org Export Set up (Internal Only)                               :noexport:
 
@@ -68,23 +67,25 @@ Host <<myvm>>
 
 ** Preamble
 
-The following instructions describe how to configure a Microsoft Azure VM serving data with the [[http://www.unidata.ucar.edu/software/ldm/][LDM]], [[http://www.unidata.ucar.edu/software/thredds/current/tds/][TDS]], and [[http://sourceforge.net/projects/ramadda/][RAMADDA]]. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers. They also assume familiarity with Unix, Docker, and Unidata technology in general. We will be using Docker images defined here:
+The following instructions describe how to configure a [[https://azure.microsoft.com][Microsoft Azure VM]] serving data with the [[http://www.unidata.ucar.edu/software/ldm/][LDM]], [[http://www.unidata.ucar.edu/software/thredds/current/tds/][TDS]], and [[http://sourceforge.net/projects/ramadda/][RAMADDA]]. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You will have to be comfortable entering command at the Unix command line. We will be using Docker images defined here:\\
 
-[[https://github.com/Unidata/Unidata-Dockerfiles]]
+https://github.com/Unidata/Unidata-Dockerfiles\\
 
-in addition to a configuration specifically planned for AMS 2016 demonstrations here:
+in addition to a configuration specifically planned for AMS 2016 demonstrations here:\\
 
-[[https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016]]
+[[https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016]]\\
 
-**  Preliminary Setup on Azure (Mostly Docker)
+*** =docker-machine=
 
-For these instructions, we will decide on the name of an Azure VM; =unidata-server.cloudapp.net= abbreviated to =unidata-server=.
+[[https://docs.docker.com/machine/install-machine/][Install]] =docker-machine= on your local computer. =docker-machine= is a command line tool that gives users the ability to create Docker VMs on your local computer or on a cloud provider such as Azure.
 
-We will now create a VM on Azure.
+** Preliminary Setup on Azure
 
-On your local machine you will want to set up an Azure VM with a =docker-machine= command that will look something like the command below. See [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][here]] for more information on using =docker-machine= with Azure.
+The instructions assume we will create an Azure VM called =unidata-server.cloudapp.net= abbreviated to =unidata-server=. Tailor the VM name for your purposes when following this document. This VM will be our *Docker Host* from where we will run Docker containers for the LDM, TDS, and RAMADDA.
 
-The following command will take a while to run (between 5 and 10 minutes). You will have to supply =azure-subscription-id= and =azure-subscription-cert= path provided by Azure. Again see [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][here]] if you have questions.
+*** Create a VM on Azure.
+
+The following =docker-machine= command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply =azure-subscription-id= and =azure-subscription-cert= path. See these Azure =docker-machine= [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][instructions]], if you have questions about this process.
 
 # Don't execute the following code block in this buffer; it will take too long. Instead =org-babel-tangle= with a prefix argument; C-u C-c C-v t. Then execute from the command line =/tmp/azure.sh=.
 
@@ -97,13 +98,15 @@ docker-machine -D create -d azure \
 
 #+INCLUDE: "/tmp/azure.sh" src org 
 
-Set up your environment to interact with your new Azure VM.
+*** Configure Unix Shell to Interact with New Azure VM.
+
+Execute the following command in your local computer shell environment.
 
 #+BEGIN_SRC sh :dir ~ :results silent :noweb yes
   eval "$(docker-machine env <<myvm>>)"
 #+END_SRC
 
-=ssh= into your new host with =docker-machine=
+*** =ssh= into VM with =docker-machine=
 
 #+BEGIN_SRC sh :eval no :noweb yes
   docker-machine ssh <<myvm>>
@@ -111,14 +114,16 @@ Set up your environment to interact with your new Azure VM.
 
 # You are about to start running remote execution commands on the Azure VM via tramp. Make sure you can ssh into the VM from the command line to diagnose any potential problems. Also don't forget to tramp clean up connections, if there are problems.
 
-You will need to install one or more Unix utilities:
+*** Install Package(s) with =apt-get=
+
+At the very least, we will need =unzip= on the Azure Docker host.
 
 #+BEGIN_SRC sh  :results verbatim drawer :exports code
   sudo apt-get -qq update
   sudo apt-get -qq install unzip
 #+END_SRC
 
-Add the =ubuntu= user to the =docker= group.
+*** Add =ubuntu= User to =docker= Group and Restart Docker
 
 #+BEGIN_SRC sh :results verbatim drawer :exports code
   sudo usermod -G docker ubuntu
@@ -131,159 +136,199 @@ docker stop/waiting
 docker start/running, process 29917
 :END:
 
-At this point, we want to restart the VM to get a fresh start. This may take a little while....
+*** Restart Azure VM
 
-#+BEGIN_SRC sh :dir ~ :noweb yes :results verbatim drawer :exports code
-  docker-machine restart <<myvm>>
-  eval "$(docker-machine env <<myvm>>)"
-#+END_SRC
+ At this point, we want to restart the VM to get a fresh start. This command may take a little while...
 
-#+RESULTS:
-:RESULTS:
-Restarted machines may have new IP addresses. You may need to re-run the `docker-machine env` command.
-:END:
+ #+BEGIN_SRC sh :dir ~ :noweb yes :results verbatim drawer :exports code
+   docker-machine restart <<myvm>>
+   eval "$(docker-machine env <<myvm>>)"
+ #+END_SRC
 
-#+BEGIN_SRC sh :dir ~ :eval no :noweb yes
-  docker-machine ssh <<myvm>>
-#+END_SRC
+ #+RESULTS:
+ :RESULTS:
+ Restarted machines may have new IP addresses. You may need to re-run the `docker-machine env` command.
+ :END:
 
-#+BEGIN_SRC org :noweb-ref dcompose-version :exports none
-1.5.2
-#+END_SRC
+*** =ssh= into VM
 
-#+BEGIN_SRC emacs-lisp :noweb yes :results raw :exports results
-  (format "Next install =docker-compose=. You may have to update version (currently at =<<dcompose-version>>=).")
-#+END_SRC
+ #+BEGIN_SRC sh :dir ~ :eval no :noweb yes
+   docker-machine ssh <<myvm>>
+ #+END_SRC
 
-#+RESULTS:
-Next install =docker-compose=. You may have to update version (currently at =1.5.2=).
+*** Install =docker-compose= on VM
 
-#+BEGIN_SRC sh :noweb yes :results verbatim drawer :exports code
-  curl -L \
- https://github.com/docker/compose/releases/download/<<dcompose-version>>/docker-compose-`uname -s`-`uname -m` \
-       > docker-compose
-  sudo mv docker-compose /usr/local/bin/
-  sudo chmod +x /usr/local/bin/docker-compose
-#+END_SRC
+ #+BEGIN_SRC org :noweb-ref dcompose-version :exports none
+ 1.5.2
+ #+END_SRC
 
-#+RESULTS:
-:RESULTS:
-:END:
+=docker-compose= is a tool for defining and running multi-container Docker applications. In our case, we will be running the LDM, TDS, TDM (THREDDS Data Manager) and RAMADDA so =docker-compose= is perfect for this scenario. Install =docker-compose= on the Azure Docker host.
+
+ #+BEGIN_SRC emacs-lisp :noweb yes :results raw :exports results
+   (format "You may have to update version (currently at =<<dcompose-version>>=).")
+ #+END_SRC
+
+ #+RESULTS:
+ You may have to update version (currently at =1.5.2=). 
+
+ #+BEGIN_SRC sh :noweb yes :results verbatim drawer :exports code
+   curl -L \
+  https://github.com/docker/compose/releases/download/<<dcompose-version>>/docker-compose-`uname -s`-`uname -m` \
+        > docker-compose
+   sudo mv docker-compose /usr/local/bin/
+   sudo chmod +x /usr/local/bin/docker-compose
+ #+END_SRC
+
+ #+RESULTS:
+ :RESULTS:
+ :END:
 
 ** LDM and TDS Configuration
+*** Background
 
-Clone =Unidata-Dockerfiles= and =TdsConfig= repositories:
+At this point, we have done the preliminary legwork to tackle the next step in this process. We will now want to clone two repositories that will allow us to configure and start running the the LDM, TDS, and RAMADDA. In particular, we will be cloning:
+
+  - [[https://github.com/Unidata/Unidata-Dockerfiles][=Unidata-Dockerfiles=]]  
+  - [[https://github.com/Unidata/TdsConfig][=TdsConfig=]] 
+
+**** =Unidata-Dockerfiles=
+
+The =Unidata-Dockerfiles= repository contains a number of Dockerfiles that pertain to various Unidata technologies (e.g., the LDM) and also projects (e.g., ams2016). As a matter of background information, a =Dockerfile= is a text file that contains commands to build a Docker image containing, for example, a working LDM. These Docker images can subsequently be run by =docker= command line tools, or =docker-compose= commands that rely on a =docker-compose.yml= file. A =docker-compose.yml= file is a text file that captures exactly how one or more containers run including directory mappings (from outside to within the container), port mappings (from outside to within the container), and other information.
+
+**** =TDSConfig= 
+
+The =TDSConfig= repository is a project that captures THREDDS and LDM configuration files (e.g., =catalog.xml=, =pqact.conf=) for the TDS at [[http://thredds.ucar.edu]]. Specifically, these TDS and LDM configurations were meant to work in harmony with one another. We can re-use this configuration with some minor adjustments for running the TDS on the Azure cloud.
+
+*** =git clone= Repositories
+
+With that background information out of the way, let's clone those repositories by creating =~/git= directory where our repositories will live and issuing some =git= commands.
 
 #+BEGIN_SRC sh :results silent
   mkdir -p /home/ubuntu/git
-  git clone https://github.com/Unidata/Unidata-Dockerfiles /home/ubuntu/git/Unidata-Dockerfiles
+  git clone https://github.com/Unidata/Unidata-Dockerfiles \
+      /home/ubuntu/git/Unidata-Dockerfiles
   git clone https://github.com/Unidata/TdsConfig /home/ubuntu/git/TdsConfig
 #+END_SRC
 
-Create some directories for the LDM, basically the familiar =etc=, =var=, =var/log=.
+*** Configuring the LDM
+**** LDM Directories on Docker Host
 
-#+BEGIN_SRC sh  :results silent
-  mkdir -p ~/var/logs 
-  mkdir -p ~/etc/TDS
+ For anyone who has worked with the LDM, you may be familiar with the following directories:
+
+ #+BEGIN_EXAMPLE
+ etc/
+ var/data
+ var/logs
+ var/queue
+ #+END_EXAMPLE
+
+ The LDM =etc= directory is where you will find configuration files related to the LDM including =ldmd.conf=, =pqact= files, =registry.xml=, and  =scour.conf=. We will need the ability to easily observe and manipulate the files from *outside* the running LDM container. To that end, we need to find a home for =etc= on the Docker host. The same is true for the =var/data= and =var/logs= directories. Later, we will use Docker commands that have been written on your behalf to mount these directories from *outside* to within the container. The =var/queues= directory will remain inside the container.
+
+ #+BEGIN_SRC sh  :results silent
+   mkdir -p ~/var/logs 
+   mkdir -p ~/etc/TDS
+ #+END_SRC
+
+ =var/data= is a bit different in that it needs to be mounted on data volume on the Docker host. We will be handling that step further on.
+
+**** LDM Configuration Files
+
+There is a generic set of LDM configuration files located here =~/git/Unidata-Dockerfiles/ldm/etc/=. However, we will just grab =netcheck.conf= which will remain unmodified.
+
+#+BEGIN_SRC sh :results silent :exports code
+  cp ~/git/Unidata-Dockerfiles/ldm/etc/netcheck.conf ~/etc
 #+END_SRC
 
-Now copy all files in =~/git/Unidata-Dockerfiles/ldm/etc/= into the =~/etc= directory from the =Unidata-Dockerfiles= repositories. Note that some of these files will be modified or overwritten shortly.
+The rest of the LDM configuration files will come from our =ams2016= project directory.
+
+Also, remember that these files will be used *inside* the LDM container that we will set up shortly. We will now be working with these files:
 
 - =ldmd.conf=
 - =registry.xml=
-- =pqact.conf=
 - =scour.conf=
-- =netcheck.conf=
 
-#+BEGIN_SRC sh :results silent :exports code
-  cp ~/git/Unidata-Dockerfiles/ldm/etc/* ~/etc
-#+END_SRC
+***** =ldmd.conf=
 
-Now we are going to replace =ldmd.conf=, =registry.xml=, =scour.conf= from the =~/git/Unidata-Dockerfiles/ams2016= dir into =~/etc=.
+  #+BEGIN_SRC sh :results silent :exports code
+    cp ~/git/Unidata-Dockerfiles/ams2016/ldmd.conf ~/etc/
+  #+END_SRC
 
-*** Ask for Unidata (or Someone to Feed You Data Via the LDM)
+  This =ldmd.conf= has been setup for the AMS 2016 demonstration serving the following data feeds:
+   - [[http://rapidrefresh.noaa.gov/][13km Rapid Refresh]]
 
-The LDM operates on a push data model. You will have to find someone who will agree to push you the data. If you are part of the American academic community please send a support email to support-idd@unidata.ucar.edu.
+  In addition, there is a =~/git/TdConfig/idd/pqacts/README.txt= file that may be helpful in writing a suitable =ldmd.conf= file.
 
-*** =ldmd.conf=
+***** =registry.xml=
 
-#+BEGIN_SRC sh :results silent :exports code
-  cp ~/git/Unidata-Dockerfiles/ams2016/ldmd.conf ~/etc/
-#+END_SRC
+  #+BEGIN_SRC sh  :results silent :exports code
+    cp ~/git/Unidata-Dockerfiles/ams2016/registry.xml ~/etc/
+  #+END_SRC
 
-This =ldmd.conf= has been setup for the AMS 2016 demonstration serving the following data feeds:
- - [[http://rapidrefresh.noaa.gov/][13km Rapid Refresh]]
+  This file has been set up for the AMS 2016 demonstration. Otherwise you would have to edit the =registry.xml= to ensure the =hostname= element is correct. For your own cloud VMs, work with =support-idd@unidata.ucar.edu= to devise a correct =hostname= element so that LDM statsitics get properly reported. Here is an example =hostname= element =unidata-server.azure.unidata.ucar.edu=.
 
-In addition, there is a =~/git/TdConfig/idd/pqacts/README.txt= file that may be helpful in writing a suitable =ldmd.conf= file.
+  #+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes
+    ;; search for the buffer called registry.xml in your emacs session
+    (find-file "/ubuntu@<<myvm>>:/home/ubuntu/etc/registry.xml")
+  #+END_SRC
 
-*** =registry.xml=
+***** =scour.conf=
 
-#+BEGIN_SRC sh  :results silent :exports code
-  cp ~/git/Unidata-Dockerfiles/ams2016/registry.xml ~/etc/
-#+END_SRC
+  You need to scour data or else your disk will full up. The crontab entry that runs scour is in the [[https://github.com/Unidata/Unidata-Dockerfiles/blob/master/ldm/crontab][LDM Docker container]]. Scouring is invoked once per day.
 
-Make sure the =registry.xml= is edited correctly. The important element in this file is the =hostname= element. Work with support-idd@unidata.ucar.ed so that LDM stats get properly reported. It should be something like =unidata-server.azure.unidata.ucar.edu=.
+  #+BEGIN_SRC sh  :results silent
+    cp ~/git/Unidata-Dockerfiles/ams2016/scour.conf ~/etc/
+  #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes
-  ;; search for the buffer called registry.xml in your emacs session
-  (find-file "/ubuntu@<<myvm>>:/home/ubuntu/etc/registry.xml")
-#+END_SRC
+***** =pqact.conf= and TDS configuration
 
-*** =scour.conf=
+  In the =ldmd.conf= file we copied just a moment ago there is a reference to a =pqact= file; =etc/TDS/pqact.forecastModels=. We need to ensure that file exists by doing the following instructions. Specifically, explode =~/git/TdsConfig/idd/config.zip= into =~/tdsconfig= and =cp -r= the =pqacts= directory into =~/etc/TDS=. *Note* do NOT use soft links. Docker does not like them.
 
-Scouring configuration for the LDM. The crontab entry that runs scour is in the [[https://github.com/Unidata/Unidata-Dockerfiles/blob/master/ldm/crontab][LDM Docker container]]. scour is invoked once per day.
+  #+BEGIN_SRC sh  :results silent
+    mkdir -p ~/tdsconfig/
+    cp ~/git/TdsConfig/idd/config.zip ~/tdsconfig/
+    unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
+    cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
+  #+END_SRC
 
-#+BEGIN_SRC sh  :results silent
-  cp ~/git/Unidata-Dockerfiles/ams2016/scour.conf ~/etc/
-#+END_SRC
+**** Upstream Data Feed from Unidata or Elsewhere
 
-*** =pqact.conf= and TDS configuration
+ The LDM operates on a push data model. You will have to find someone who will agree to push you the data. If you are part of the American academic community please send a support email to =support-idd@unidata.ucar.edu= to discuss your LDM data requirements.
 
-Next, explode =~/git/TdsConfig/idd/config.zip= into =~/tdsconfig= and =cp -r= the =pqacts= directory into =~/etc/TDS=. *Note* do NOT use soft links. Docker does not like them.
+*** Configuring the TDS
+**** Edit TDS catalog.xml Files
 
-#+BEGIN_SRC sh  :results silent
-  mkdir -p ~/tdsconfig/
-  cp ~/git/TdsConfig/idd/config.zip ~/tdsconfig/
-  unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
-  cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
-#+END_SRC
+The =catalog.xml= files for TDS configuration are contained within the =~/tdsconfig= directory. Search for all files terminating in =.xml= in that directory. Edit the xml files for what data you wish to server. See the [[Http://Www.Unidata.Ucar.Edu/Software/Thredds/Current/Tds/Catalog/Index.Html][TDS Documentation]] for more information on editing these XML files.
 
-*** =netcheck.conf=
+  Let's see what is available in the =~/tdsconfig= directory.
 
-This files remain unchanged.
+  #+BEGIN_SRC sh :results org :exports both
+    find ~/tdsconfig -type f -name "*.xml"
+  #+END_SRC
 
-** Edit TDS catalog.xml Files
+  #+RESULTS:
+  #+BEGIN_SRC org
+  /home/ubuntu/tdsconfig/idd/forecastModels.xml
+  /home/ubuntu/tdsconfig/idd/radars.xml
+  /home/ubuntu/tdsconfig/idd/obsData.xml
+  /home/ubuntu/tdsconfig/idd/forecastProdsAndAna.xml
+  /home/ubuntu/tdsconfig/idd/satellite.xml
+  /home/ubuntu/tdsconfig/radar/CS039_L2_stations.xml
+  /home/ubuntu/tdsconfig/radar/CS039_stations.xml
+  /home/ubuntu/tdsconfig/radar/RadarNexradStations.xml
+  /home/ubuntu/tdsconfig/radar/RadarTerminalStations.xml
+  /home/ubuntu/tdsconfig/radar/RadarL2Stations.xml
+  /home/ubuntu/tdsconfig/radar/radarCollections.xml
+  /home/ubuntu/tdsconfig/catalog.xml
+  /home/ubuntu/tdsconfig/threddsConfig.xml
+  /home/ubuntu/tdsconfig/wmsConfig.xml
+  #+END_SRC
 
-The =catalog.xml= files for TDS configuration are contained with the =~/Tdsconfig= directory. Search for all files terminating in =.xml= in that directory. Edit the xml files for what data you wish to server. See the [[Http://Www.Unidata.Ucar.Edu/Software/Thredds/Current/Tds/Catalog/Index.Html][TDS Documentation]] for more information on editing these XML files.
+** Setting up Data Volumes 
 
-Let's see what is available in the =~/tdsconfig= directory.
+As alluded to earlier, we will have to set up data volumes so that the LDM can write data, and the TDS and RAMADDA can have access to that data. The =/mnt= volume on Azure is a good place to store data. I do not know what kind of assurances Azure makes about the reliability of storing your data there for the long term. (I remember reading about this once, but I cannot remember where.) For the LDM this should not be too much of a problem, but for RAMADDA you may wish to be careful.
 
-#+BEGIN_SRC sh :results org :exports both
-  find ~/tdsconfig -type f -name "*.xml"
-#+END_SRC
+Let's first display the free disk space with the =df= command. 
 
-#+RESULTS:
-#+BEGIN_SRC org
-/home/ubuntu/tdsconfig/idd/forecastModels.xml
-/home/ubuntu/tdsconfig/idd/radars.xml
-/home/ubuntu/tdsconfig/idd/obsData.xml
-/home/ubuntu/tdsconfig/idd/forecastProdsAndAna.xml
-/home/ubuntu/tdsconfig/idd/satellite.xml
-/home/ubuntu/tdsconfig/radar/CS039_L2_stations.xml
-/home/ubuntu/tdsconfig/radar/CS039_stations.xml
-/home/ubuntu/tdsconfig/radar/RadarNexradStations.xml
-/home/ubuntu/tdsconfig/radar/RadarTerminalStations.xml
-/home/ubuntu/tdsconfig/radar/RadarL2Stations.xml
-/home/ubuntu/tdsconfig/radar/radarCollections.xml
-/home/ubuntu/tdsconfig/catalog.xml
-/home/ubuntu/tdsconfig/threddsConfig.xml
-/home/ubuntu/tdsconfig/wmsConfig.xml
-#+END_SRC
-
-** Setting up the Data Volumes for the LDM and RAMADDA
-
-The =/mnt= volume on Azure is a good place to store data. I do not know what kind of assurances Azure makes about the reliability of storing your data there for the long term. (I remember reading about this once, but I cannot remember where.) For the LDM this should not be too much of a problem, but for RAMADDA you may wish to be careful.
- 
 #+BEGIN_SRC sh :results table drawer :exports both
   df -H
 #+END_SRC
@@ -302,34 +347,31 @@ The =/mnt= volume on Azure is a good place to store data. I do not know what kin
 | /dev/sdb1  | 640G |  73M | 607G  |   1% | /mnt                              |    |
 :END:
 
-Create a =/data= directory where the LDM and RAMADDA data will live. 
-
-For the LDM:
+Create a =/data= directory where the LDM can write data soft link to the =/mnt= directory. Also, create a =/repository= directory where RAMADDA data will reside.
 
 #+BEGIN_SRC sh :results silent
   sudo ln -s /mnt /data
   sudo mkdir /mnt/ldm/
   sudo chown -R ubuntu:docker /data/ldm
-#+END_SRC
-
-Create a =/repository= directory where the RAMADDA data will live.
-
-#+BEGIN_SRC sh  :results silent
   sudo mkdir /mnt/repository/
   sudo chown -R ubuntu:docker /data/repository
 #+END_SRC
 
+These directories will be used by the LDM, TDS, and RAMADDA docker containers when we mount diretories from the Docker host into these containers.
+
 ** RAMADDA Configuration
 
-When you fire up RAMADDA for the very first time, your will have to have a =password.properties= file in the RAMADDA home directory which is =/data/repository/=. See [[http://ramadda.org//repository/userguide/toc.html][RAMADDA documentation]] for more details on setting up RAMADDA.
+When you fire up RAMADDA for the very first time, you ,ust have  a =password.properties= file in the RAMADDA home directory which is =/data/repository/=. See [[http://ramadda.org//repository/userguide/toc.html][RAMADDA documentation]] for more details on setting up RAMADDA.
+
+Here is a =pw.properties= file to get you going. Change password below to something more secure!
 
 #+BEGIN_SRC sh :results silent
   echo ramadda.install.password=changeme! > /data/repository/pw.properties
 #+END_SRC
 
-** Ports 
+** Opening Ports 
 
-Make sure these ports are open on the VM where you are doing this work. Ask the cloud administrator for these ports to be open.
+Ensure these ports are open on the VM where these containers will run. Ask the cloud administrator for these ports to be open.
 
 |---------+---------------|
 | Service | External Port |
@@ -341,6 +383,8 @@ Make sure these ports are open on the VM where you are doing this work. Ask the 
 | LDM     |           388 |
 |---------+---------------|
 
+Note the TDM is an application that works in conjuction with the TDS. It creates indexes for GRIB data in the background, and notifies the TDS via port 8443 when data have been updated or changed. See [[https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html][here]] to learn more about the TDM.
+
 ** Tomcat Logging for TDS and RAMADDA
 
 It is a good idea to mount Tomcat logging directories outside the container so that they can be managed for both the TDS and RAMADDA.
@@ -350,9 +394,9 @@ It is a good idea to mount Tomcat logging directories outside the container so t
   mkdir -p ~/logs/tds-tomcat
 #+END_SRC
 
-Note that there is also a logging directory in =~/tdsconfig/logs=. That should be looked at periodically.
+Note there is also a logging directory in =~/tdsconfig/logs=. All these logging directories should be looked at periodically, not the least to ensure that log files are not filling up your system.
 
-** Fire Up the LDM TDS RAMADDA TDM
+** Starting the LDM TDS RAMADDA TDM
 
 Edit the =docker-compose.yml= file and change the =TDM_PW= to =MeIndexer=.
 
@@ -372,15 +416,15 @@ At this point you are almost ready to run the whole kit and caboodle. But first 
   docker pull unidata/ramadda:latest
 #+END_SRC
 
-At this point you can run 
+Now you can run
 
 #+BEGIN_SRC sh :results silent
   docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 #+END_SRC
 
-** Check What You Have Setup
+** Check What is Running 
 
-At this point you have these services running:
+At this point, you should have these services running:
 
 - LDM
 - TDS
@@ -395,6 +439,8 @@ Verify you have the TDS running by navigating to:
 
 #+RESULTS:
 [[http://unidata-server.cloudapp.net/thredds/catalog.html]]
+
+You should now be able to download the Unidata Integrated Data Viewer and point it to this catalog to access and display data.
 
 Verify you have the RAMADDA running by navigating to:
 
