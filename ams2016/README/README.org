@@ -254,6 +254,8 @@ Also, remember that these files will be used *inside* the LDM container that we 
 
  This =ldmd.conf= has been setup for the AMS 2016 demonstration serving the following data feeds:
   - [[http://rapidrefresh.noaa.gov/][13km Rapid Refresh]]
+  - [[http://www.nesdis.noaa.gov/imagery_data.html][NESDIS GOES Satellite Data]]
+  - Unidata NEXRAD Composites
 
  In addition, there is a =~/git/TdConfig/idd/pqacts/README.txt= file that may be helpful in writing a suitable =ldmd.conf= file.
 
@@ -413,7 +415,7 @@ Note there is also a logging directory in =~/tdsconfig/logs=. All these logging 
 * Starting the LDM TDS RAMADDA TDM
 *** RAMADDA Preconfiguration
 
-  When you start RAMADDA for the very first time, you must have  a =password.properties= file in the RAMADDA home directory which is =/data/repository/=. See [[http://ramadda.org//repository/userguide/toc.html][RAMADDA documentation]] for more details on setting up RAMADDA. Here is a =pw.properties= file to get you going. Change password below to something more secure!
+When you start RAMADDA for the very first time, you must have  a =password.properties= file in the RAMADDA home directory which is =/data/repository/=. See [[http://ramadda.org//repository/userguide/toc.html][RAMADDA documentation]] for more details on setting up RAMADDA. Here is a =pw.properties= file to get you going. Change password below to something more secure!
 
   #+BEGIN_SRC sh :results silent
     echo ramadda.install.password=changeme! > /data/repository/pw.properties
