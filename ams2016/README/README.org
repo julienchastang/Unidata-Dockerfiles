@@ -284,12 +284,12 @@ You need to scour data or else your disk will full up. The crontab entry that ru
 
 In the =ldmd.conf= file we copied just a moment ago there is a reference to a =pqact= file; =etc/TDS/pqact.forecastModels=. We need to ensure that file exists by doing the following instructions. Specifically, explode =~/git/TdsConfig/idd/config.zip= into =~/tdsconfig= and =cp -r= the =pqacts= directory into =~/etc/TDS=. *Note* do NOT use soft links. Docker does not like them.
 
-  #+BEGIN_SRC sh  :results silent
-    mkdir -p ~/tdsconfig/
-    cp ~/git/tdsConfig/idd/config.zip ~/tdsconfig/
-    unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
-    cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
-  #+END_SRC
+#+BEGIN_SRC sh  :results silent
+  mkdir -p ~/tdsconfig/
+  cp ~/git/TdsConfig/idd/config.zip ~/tdsconfig/
+  unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
+  cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
+#+END_SRC
 
 **** Edit =ldmfile.sh=
 
@@ -318,27 +318,27 @@ The =catalog.xml= files for TDS configuration are contained within the =~/tdscon
 
   Let's see what is available in the =~/tdsconfig= directory.
 
-  #+BEGIN_SRC sh :results org :exports both
-    find ~/tdsconfig -type f -name "*.xml"
-  #+END_SRC
+#+BEGIN_SRC sh :results org :exports both
+  find ~/tdsconfig -type f -name "*.xml"
+#+END_SRC
 
-  #+RESULTS:
-  #+BEGIN_SRC org
-  /home/ubuntu/tdsconfig/idd/forecastModels.xml
-  /home/ubuntu/tdsconfig/idd/radars.xml
-  /home/ubuntu/tdsconfig/idd/obsData.xml
-  /home/ubuntu/tdsconfig/idd/forecastProdsAndAna.xml
-  /home/ubuntu/tdsconfig/idd/satellite.xml
-  /home/ubuntu/tdsconfig/radar/CS039_L2_stations.xml
-  /home/ubuntu/tdsconfig/radar/CS039_stations.xml
-  /home/ubuntu/tdsconfig/radar/RadarNexradStations.xml
-  /home/ubuntu/tdsconfig/radar/RadarTerminalStations.xml
-  /home/ubuntu/tdsconfig/radar/RadarL2Stations.xml
-  /home/ubuntu/tdsconfig/radar/radarCollections.xml
-  /home/ubuntu/tdsconfig/catalog.xml
-  /home/ubuntu/tdsconfig/threddsConfig.xml
-  /home/ubuntu/tdsconfig/wmsConfig.xml
-  #+END_SRC
+#+RESULTS:
+#+BEGIN_SRC org
+/home/ubuntu/tdsconfig/idd/forecastModels.xml
+/home/ubuntu/tdsconfig/idd/radars.xml
+/home/ubuntu/tdsconfig/idd/obsData.xml
+/home/ubuntu/tdsconfig/idd/forecastProdsAndAna.xml
+/home/ubuntu/tdsconfig/idd/satellite.xml
+/home/ubuntu/tdsconfig/radar/CS039_L2_stations.xml
+/home/ubuntu/tdsconfig/radar/CS039_stations.xml
+/home/ubuntu/tdsconfig/radar/RadarNexradStations.xml
+/home/ubuntu/tdsconfig/radar/RadarTerminalStations.xml
+/home/ubuntu/tdsconfig/radar/RadarL2Stations.xml
+/home/ubuntu/tdsconfig/radar/radarCollections.xml
+/home/ubuntu/tdsconfig/catalog.xml
+/home/ubuntu/tdsconfig/threddsConfig.xml
+/home/ubuntu/tdsconfig/wmsConfig.xml
+#+END_SRC
 
 * Setting up Data Volumes 
 
@@ -352,17 +352,17 @@ you may wish to be careful.
 ** Check Free Disk Space
 
 Let's first display the free disk space with the =df= command. 
-
+#+NAME: df-table
 #+BEGIN_SRC sh :results table drawer :exports both
   df -H
 #+END_SRC
 
-#+RESULTS:
+#+RESULTS: df-table
 :RESULTS:
 | Filesystem | Size | Used | Avail | Use% | Mounted                           | on |
-| /dev/sda1  | 31G  | 1.8G | 28G   |   6% | /                                 |    |
+| /dev/sda1  | 31G  | 2.0G | 28G   |   7% | /                                 |    |
 | none       | 4.1k |    0 | 4.1k  |   0% | /sys/fs/cgroup                    |    |
-| udev       | 7.4G |  13k | 7.4G  |   1% | /dev                              |    |
+| udev       | 7.4G | 8.2k | 7.4G  |   1% | /dev                              |    |
 | tmpfs      | 1.5G | 394k | 1.5G  |   1% | /run                              |    |
 | none       | 5.3M |    0 | 5.3M  |   0% | /run/lock                         |    |
 | none       | 7.4G |    0 | 7.4G  |   0% | /run/shm                          |    |
@@ -417,9 +417,9 @@ Note there is also a logging directory in =~/tdsconfig/logs=. All these logging 
 
 When you start RAMADDA for the very first time, you must have  a =password.properties= file in the RAMADDA home directory which is =/data/repository/=. See [[http://ramadda.org//repository/userguide/toc.html][RAMADDA documentation]] for more details on setting up RAMADDA. Here is a =pw.properties= file to get you going. Change password below to something more secure!
 
-  #+BEGIN_SRC sh :results silent
-    echo ramadda.install.password=changeme! > /data/repository/pw.properties
-  #+END_SRC
+#+BEGIN_SRC sh :results silent
+  echo ramadda.install.password=changeme! > /data/repository/pw.properties
+#+END_SRC
 
 *** Final Edit to =docker-compose.yml=
 
@@ -466,18 +466,20 @@ Next, we will check our work through various means.
 
 From the shell where you started =docker-machine= earlier you can execute the following =docker ps= command to list the containers on your docker host. It should look something like the output below.
 
+#+NAME: docker-ps
 #+BEGIN_SRC sh :results table drawer  :exports both
   docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Status}}"
 #+END_SRC
 
-#+RESULTS:
+#+RESULTS: docker-ps
 :RESULTS:
-| CONTAINER    | ID                     | IMAGE | STATUS |      |
-| 32d3b20c8329 | unidata/ramadda:latest | Up    |      5 | days |
-| 594577bb15b9 | unidata/ldmtds:latest  | Up    |      5 | days |
-| d86a3d33216f | unidata/tdm:latest     | Up    |      5 | days |
-| 69fc06217d86 | unidata/tds:latest     | Up    |      5 | days |
+| CONTAINER    | ID                     | IMAGE | STATUS |         |
+| 4ed1c4c18814 | unidata/ramadda:latest | Up    |     17 | seconds |
+| bdfcf5590bc6 | unidata/ldmtds:latest  | Up    |     18 | seconds |
+| aee044cf8e66 | unidata/tdm:latest     | Up    |     20 | seconds |
+| 4d0208f85b22 | unidata/tds:latest     | Up    |     21 | seconds |
 :END:
+
 
 ** TDS and RAMADDA URLs
 
