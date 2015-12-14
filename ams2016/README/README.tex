@@ -1,4 +1,4 @@
-% Created 2015-12-14 Mon 13:05
+% Created 2015-12-14 Mon 16:17
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -37,7 +37,7 @@
 \section{Preamble}
 \label{sec:orgheadline1}
 
-The following instructions describe how to configure a \href{https://azure.microsoft.com}{Microsoft Azure VM} serving data with the \href{http://www.unidata.ucar.edu/software/ldm/}{LDM}, \href{http://www.unidata.ucar.edu/software/thredds/current/tds/}{TDS}, and \href{http://sourceforge.net/projects/ramadda/}{RAMADDA}. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You will have to be comfortable entering command at the Unix command line. We will be using Docker images defined at the \href{https://github.com/Unidata/Unidata-Dockerfiles}{Unidata-Dockerfiles repository} in addition to a configuration specifically planned for AMS 2016 demonstrations  project \href{https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016}{AMS 2016 demonstrations  project}.
+The following instructions describe how to configure a \href{https://azure.microsoft.com}{Microsoft Azure VM} serving data with the \href{http://www.unidata.ucar.edu/software/ldm/}{LDM}, \href{http://www.unidata.ucar.edu/software/thredds/current/tds/}{TDS}, and \href{http://sourceforge.net/projects/ramadda/}{RAMADDA}. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You will have to be comfortable entering commands at the Unix command line. We will be using Docker images defined at the \href{https://github.com/Unidata/Unidata-Dockerfiles}{Unidata-Dockerfiles repository} in addition to a configuration specifically planned for AMS 2016 demonstrations  project \href{https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016}{AMS 2016 demonstrations  project}.
 \section{Preliminary Setup on Azure}
 \label{sec:orgheadline11}
 
@@ -176,7 +176,7 @@ var/logs
 var/queue
 \end{verbatim}
 
-The LDM \texttt{etc} directory is where you will find configuration files related to the LDM including \texttt{ldmd.conf}, \texttt{pqact} files, \texttt{registry.xml}, and  \texttt{scour.conf}. We will need the ability to easily observe and manipulate the files from \textbf{outside} the running LDM container. To that end, we need to find a home for \texttt{etc} on the Docker host. The same is true for the \texttt{var/data} and \texttt{var/logs} directories. Later, we will use Docker commands that have been written on your behalf to mount these directories from \textbf{outside} to within the container. The \texttt{var/queues} directory will remain inside the container.
+The LDM \texttt{etc} directory is where you will find configuration files related to the LDM including \texttt{ldmd.conf}, \texttt{pqact} files, \texttt{registry.xml}, and  \texttt{scour.conf}. We will need the ability to easily observe and manipulate the files from \textbf{outside} the running LDM container. To that end, we need to find a home for \texttt{etc} on the Docker host. The same is true for the \texttt{var/data} and \texttt{var/logs} directories. Later, we will use Docker commands that have been written on your behalf to mount these directories from \textbf{outside} to \textbf{within} the container. The \texttt{var/queues} directory will remain inside the container.
 
 \begin{verbatim}
 mkdir -p ~/var/logs 
@@ -219,7 +219,7 @@ This \texttt{ldmd.conf} has been setup for the AMS 2016 demonstration serving th
 \item Unidata NEXRAD Composites
 \end{itemize}
 
-In addition, there is a \texttt{\textasciitilde{}/git/TdConfig/idd/pqacts/README.txt} file that may be helpful in writing a suitable \texttt{ldmd.conf} file.
+For your information, and for future reference, there is a \texttt{\textasciitilde{}/git/TdConfig/idd/pqacts/README.txt} file that may be helpful in writing a suitable \texttt{ldmd.conf} file.
 
 \item \texttt{registry.xml}
 \label{sec:orgheadline18}
@@ -279,7 +279,7 @@ The LDM operates on a push data model. You will have to find someone who will ag
 \subsubsection{Edit TDS catalog.xml Files}
 \label{sec:orgheadline25}
 
-The \texttt{catalog.xml} files for TDS configuration are contained within the \texttt{\textasciitilde{}/tdsconfig} directory. Search for all files terminating in \texttt{.xml} in that directory. Edit the xml files for what data you wish to server. See the \href{http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/index.html}{TDS Documentation} for more information on editing these XML files.
+The \texttt{catalog.xml} files for TDS configuration are contained within the \texttt{\textasciitilde{}/tdsconfig} directory. Search for all files terminating in \texttt{.xml} in that directory. Edit the \texttt{xml} files for what data you wish to server. See the \href{http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/index.html}{TDS Documentation} for more information on editing these XML files.
 
 Let's see what is available in the \texttt{\textasciitilde{}/tdsconfig} directory.
 
@@ -312,7 +312,7 @@ write data, and the TDS and RAMADDA can have access to that data. The \texttt{/m
 volume on Azure is a good place to store data. Check with Azure about the
 assurances Azure makes about the reliability of storing your data there for the
 long term. For the LDM this should not be too much of a problem, but for RAMADDA
-you may wish to be careful.
+you may wish to be careful as there is the potential to lose user data.
 
 \subsection{Check Free Disk Space}
 \label{sec:orgheadline28}
@@ -350,7 +350,7 @@ sudo mkdir /mnt/repository/
 sudo chown -R ubuntu:docker /data/repository
 \end{verbatim}
 
-These directories will be used by the LDM, TDS, and RAMADDA docker containers when we mount diretories from the Docker host into these containers.
+These directories will be used by the LDM, TDS, and RAMADDA docker containers when we mount directories from the Docker host into these containers.
 
 \section{Opening Ports}
 \label{sec:orgheadline31}
@@ -383,7 +383,7 @@ mkdir -p ~/logs/ramadda-tomcat
 mkdir -p ~/logs/tds-tomcat
 \end{verbatim}
 
-Note there is also a logging directory in \texttt{\textasciitilde{}/tdsconfig/logs}. All these logging directories should be looked at periodically, not the least to ensure that log files are not filling up your system.
+Note there is also a logging directory in \texttt{\textasciitilde{}/tdsconfig/logs}. All these logging directories should be looked at periodically, not the least to ensure that \texttt{log} files are not filling up your system.
 
 \section{Starting the LDM TDS RAMADDA TDM}
 \label{sec:orgheadline37}
@@ -399,7 +399,7 @@ echo ramadda.install.password=changeme! > /data/repository/pw.properties
 \subsubsection{Final Edit to \texttt{docker-compose.yml}}
 \label{sec:orgheadline34}
 
-When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the \texttt{tdm} tomcat user. Edit the \texttt{docker-compose.yml} file and change the \texttt{TDM\_PW} to \texttt{MeIndexer}. This is not as insecure as it would seem since the tdm user has few privileges. Optimally, one could change the password hash for the TDM user in the \texttt{tomcat-users.xml} file.
+When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the \texttt{tdm} tomcat user. Edit the \texttt{docker-compose.yml} file and change the \texttt{TDM\_PW} to \texttt{MeIndexer}. This is not as insecure as it would seem since the \texttt{tdm} user has few privileges. Optimally, one could change the password hash for the TDM user in the \texttt{tomcat-users.xml} file.
 
 \subsubsection{Pull Down Images from the DockerHub Registry}
 \label{sec:orgheadline35}

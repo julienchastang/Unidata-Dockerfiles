@@ -78,7 +78,7 @@
 
 # Preamble<a id="orgheadline1"></a>
 
-The following instructions describe how to configure a [Microsoft Azure VM](https://azure.microsoft.com) serving data with the [LDM](http://www.unidata.ucar.edu/software/ldm/), [TDS](http://www.unidata.ucar.edu/software/thredds/current/tds/), and [RAMADDA](http://sourceforge.net/projects/ramadda/). This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You will have to be comfortable entering command at the Unix command line. We will be using Docker images defined at the [Unidata-Dockerfiles repository](https://github.com/Unidata/Unidata-Dockerfiles) in addition to a configuration specifically planned for AMS 2016 demonstrations  project [AMS 2016 demonstrations  project](https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016).
+The following instructions describe how to configure a [Microsoft Azure VM](https://azure.microsoft.com) serving data with the [LDM](http://www.unidata.ucar.edu/software/ldm/), [TDS](http://www.unidata.ucar.edu/software/thredds/current/tds/), and [RAMADDA](http://sourceforge.net/projects/ramadda/). This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You will have to be comfortable entering commands at the Unix command line. We will be using Docker images defined at the [Unidata-Dockerfiles repository](https://github.com/Unidata/Unidata-Dockerfiles) in addition to a configuration specifically planned for AMS 2016 demonstrations  project [AMS 2016 demonstrations  project](https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016).
 
 # Preliminary Setup on Azure<a id="orgheadline11"></a>
 
@@ -179,7 +179,7 @@ For anyone who has worked with the LDM, you may be familiar with the following d
     var/logs
     var/queue
 
-The LDM `etc` directory is where you will find configuration files related to the LDM including `ldmd.conf`, `pqact` files, `registry.xml`, and  `scour.conf`. We will need the ability to easily observe and manipulate the files from **outside** the running LDM container. To that end, we need to find a home for `etc` on the Docker host. The same is true for the `var/data` and `var/logs` directories. Later, we will use Docker commands that have been written on your behalf to mount these directories from **outside** to within the container. The `var/queues` directory will remain inside the container.
+The LDM `etc` directory is where you will find configuration files related to the LDM including `ldmd.conf`, `pqact` files, `registry.xml`, and  `scour.conf`. We will need the ability to easily observe and manipulate the files from **outside** the running LDM container. To that end, we need to find a home for `etc` on the Docker host. The same is true for the `var/data` and `var/logs` directories. Later, we will use Docker commands that have been written on your behalf to mount these directories from **outside** to **within** the container. The `var/queues` directory will remain inside the container.
 
     mkdir -p ~/var/logs 
     mkdir -p ~/etc/TDS
@@ -210,7 +210,7 @@ Also, remember that these files will be used **inside** the LDM container that w
     -   [NESDIS GOES Satellite Data](http://www.nesdis.noaa.gov/imagery_data.html)
     -   Unidata NEXRAD Composites
     
-    In addition, there is a `~/git/TdConfig/idd/pqacts/README.txt` file that may be helpful in writing a suitable `ldmd.conf` file.
+    For your information, and for future reference, there is a `~/git/TdConfig/idd/pqacts/README.txt` file that may be helpful in writing a suitable `ldmd.conf` file.
 
 2.  `registry.xml`
 
@@ -253,7 +253,7 @@ The LDM operates on a push data model. You will have to find someone who will ag
 
 ### Edit TDS catalog.xml Files<a id="orgheadline25"></a>
 
-The `catalog.xml` files for TDS configuration are contained within the `~/tdsconfig` directory. Search for all files terminating in `.xml` in that directory. Edit the xml files for what data you wish to server. See the [TDS Documentation](http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/index.html) for more information on editing these XML files.
+The `catalog.xml` files for TDS configuration are contained within the `~/tdsconfig` directory. Search for all files terminating in `.xml` in that directory. Edit the `xml` files for what data you wish to server. See the [TDS Documentation](http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/index.html) for more information on editing these XML files.
 
 Let's see what is available in the `~/tdsconfig` directory.
 
@@ -281,7 +281,7 @@ write data, and the TDS and RAMADDA can have access to that data. The `/mnt`
 volume on Azure is a good place to store data. Check with Azure about the
 assurances Azure makes about the reliability of storing your data there for the
 long term. For the LDM this should not be too much of a problem, but for RAMADDA
-you may wish to be careful.
+you may wish to be careful as there is the potential to lose user data.
 
 ## Check Free Disk Space<a id="orgheadline28"></a>
 
@@ -429,7 +429,7 @@ Create a `/data` directory where the LDM can write data soft link to the `/mnt` 
     sudo mkdir /mnt/repository/
     sudo chown -R ubuntu:docker /data/repository
 
-These directories will be used by the LDM, TDS, and RAMADDA docker containers when we mount diretories from the Docker host into these containers.
+These directories will be used by the LDM, TDS, and RAMADDA docker containers when we mount directories from the Docker host into these containers.
 
 # Opening Ports<a id="orgheadline31"></a>
 
@@ -491,7 +491,7 @@ It is a good idea to mount Tomcat logging directories outside the container so t
     mkdir -p ~/logs/ramadda-tomcat
     mkdir -p ~/logs/tds-tomcat
 
-Note there is also a logging directory in `~/tdsconfig/logs`. All these logging directories should be looked at periodically, not the least to ensure that log files are not filling up your system.
+Note there is also a logging directory in `~/tdsconfig/logs`. All these logging directories should be looked at periodically, not the least to ensure that `log` files are not filling up your system.
 
 # Starting the LDM TDS RAMADDA TDM<a id="orgheadline37"></a>
 
@@ -503,7 +503,7 @@ When you start RAMADDA for the very first time, you must have  a `password.prope
 
 ### Final Edit to `docker-compose.yml`<a id="orgheadline34"></a>
 
-When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the `tdm` tomcat user. Edit the `docker-compose.yml` file and change the `TDM_PW` to `MeIndexer`. This is not as insecure as it would seem since the tdm user has few privileges. Optimally, one could change the password hash for the TDM user in the `tomcat-users.xml` file.
+When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the `tdm` tomcat user. Edit the `docker-compose.yml` file and change the `TDM_PW` to `MeIndexer`. This is not as insecure as it would seem since the `tdm` user has few privileges. Optimally, one could change the password hash for the TDM user in the `tomcat-users.xml` file.
 
 ### Pull Down Images from the DockerHub Registry<a id="orgheadline35"></a>
 

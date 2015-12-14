@@ -65,7 +65,7 @@ _________________
   instructions should be fairly similar on other cloud providers (e.g.,
   Amazon). They also assume familiarity with Unix, Docker, and Unidata
   technology in general. You will have to be comfortable entering
-  command at the Unix command line. We will be using Docker images
+  commands at the Unix command line. We will be using Docker images
   defined at the [Unidata-Dockerfiles repository] in addition to a
   configuration specifically planned for AMS 2016 demonstrations project
   [AMS 2016 demonstrations project].
@@ -294,8 +294,8 @@ _________________
   container. To that end, we need to find a home for `etc' on the Docker
   host. The same is true for the `var/data' and `var/logs'
   directories. Later, we will use Docker commands that have been written
-  on your behalf to mount these directories from *outside* to within the
-  container. The `var/queues' directory will remain inside the
+  on your behalf to mount these directories from *outside* to *within*
+  the container. The `var/queues' directory will remain inside the
   container.
 
   ,----
@@ -342,8 +342,9 @@ _________________
   - [NESDIS GOES Satellite Data]
   - Unidata NEXRAD Composites
 
-  In addition, there is a `~/git/TdConfig/idd/pqacts/README.txt' file
-  that may be helpful in writing a suitable `ldmd.conf' file.
+  For your information, and for future reference, there is a
+  `~/git/TdConfig/idd/pqacts/README.txt' file that may be helpful in
+  writing a suitable `ldmd.conf' file.
 
 
   [13km Rapid Refresh] http://rapidrefresh.noaa.gov/
@@ -434,7 +435,7 @@ _________________
 
   The `catalog.xml' files for TDS configuration are contained within the
   `~/tdsconfig' directory. Search for all files terminating in `.xml' in
-  that directory. Edit the xml files for what data you wish to
+  that directory. Edit the `xml' files for what data you wish to
   server. See the [TDS Documentation] for more information on editing
   these XML files.
 
@@ -474,7 +475,8 @@ _________________
   data. The `/mnt' volume on Azure is a good place to store data. Check
   with Azure about the assurances Azure makes about the reliability of
   storing your data there for the long term. For the LDM this should not
-  be too much of a problem, but for RAMADDA you may wish to be careful.
+  be too much of a problem, but for RAMADDA you may wish to be careful
+  as there is the potential to lose user data.
 
 
 4.1 Check Free Disk Space
@@ -513,7 +515,7 @@ _________________
   `----
 
   These directories will be used by the LDM, TDS, and RAMADDA docker
-  containers when we mount diretories from the Docker host into these
+  containers when we mount directories from the Docker host into these
   containers.
 
 
@@ -556,7 +558,7 @@ _________________
 
   Note there is also a logging directory in `~/tdsconfig/logs'. All
   these logging directories should be looked at periodically, not the
-  least to ensure that log files are not filling up your system.
+  least to ensure that `log' files are not filling up your system.
 
 
 7 Starting the LDM TDS RAMADDA TDM
@@ -587,8 +589,8 @@ _________________
   observes with data supplied by the LDM, it will communicate via the
   `tdm' tomcat user. Edit the `docker-compose.yml' file and change the
   `TDM_PW' to `MeIndexer'. This is not as insecure as it would seem
-  since the tdm user has few privileges. Optimally, one could change the
-  password hash for the TDM user in the `tomcat-users.xml' file.
+  since the `tdm' user has few privileges. Optimally, one could change
+  the password hash for the TDM user in the `tomcat-users.xml' file.
 
 
 7.0.3 Pull Down Images from the DockerHub Registry
