@@ -339,12 +339,17 @@ _________________
   This `ldmd.conf' has been setup for the AMS 2016 demonstration serving
   the following data feeds:
   - [13km Rapid Refresh]
+  - [NESDIS GOES Satellite Data]
+  - Unidata NEXRAD Composites
 
   In addition, there is a `~/git/TdConfig/idd/pqacts/README.txt' file
   that may be helpful in writing a suitable `ldmd.conf' file.
 
 
   [13km Rapid Refresh] http://rapidrefresh.noaa.gov/
+
+  [NESDIS GOES Satellite Data]
+  http://www.nesdis.noaa.gov/imagery_data.html
 
 
 * 3.3.2.2 `registry.xml'
@@ -387,7 +392,7 @@ _________________
 
   ,----
   | mkdir -p ~/tdsconfig/
-  | cp ~/git/tdsConfig/idd/config.zip ~/tdsconfig/
+  | cp ~/git/TdsConfig/idd/config.zip ~/tdsconfig/
   | unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
   | cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
   `----
@@ -476,15 +481,14 @@ _________________
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
   Let's first display the free disk space with the `df' command.
-
   ,----
   | df -H
   `----
 
    Filesystem  Size  Used  Avail  Use%  Mounted                            on 
-   /dev/sda1   31G   1.8G  28G      6%  /                                     
+   /dev/sda1   31G   2.0G  28G      7%  /                                     
    none        4.1k     0  4.1k     0%  /sys/fs/cgroup                        
-   udev        7.4G   13k  7.4G     1%  /dev                                  
+   udev        7.4G  8.2k  7.4G     1%  /dev                                  
    tmpfs       1.5G  394k  1.5G     1%  /run                                  
    none        5.3M     0  5.3M     0%  /run/lock                             
    none        7.4G     0  7.4G     0%  /run/shm                              
@@ -638,11 +642,11 @@ _________________
   | docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Status}}"
   `----
 
-   CONTAINER     ID                      IMAGE  STATUS       
-   32d3b20c8329  unidata/ramadda:latest  Up          5  days 
-   594577bb15b9  unidata/ldmtds:latest   Up          5  days 
-   d86a3d33216f  unidata/tdm:latest      Up          5  days 
-   69fc06217d86  unidata/tds:latest      Up          5  days 
+   CONTAINER     ID                      IMAGE  STATUS          
+   4ed1c4c18814  unidata/ramadda:latest  Up         17  seconds 
+   bdfcf5590bc6  unidata/ldmtds:latest   Up         18  seconds 
+   aee044cf8e66  unidata/tdm:latest      Up         20  seconds 
+   4d0208f85b22  unidata/tds:latest      Up         21  seconds 
 
 
 8.2 TDS and RAMADDA URLs

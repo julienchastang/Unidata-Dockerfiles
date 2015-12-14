@@ -207,6 +207,8 @@ Also, remember that these files will be used **inside** the LDM container that w
     This `ldmd.conf` has been setup for the AMS 2016 demonstration serving the following data feeds:
     
     -   [13km Rapid Refresh](http://rapidrefresh.noaa.gov/)
+    -   [NESDIS GOES Satellite Data](http://www.nesdis.noaa.gov/imagery_data.html)
+    -   Unidata NEXRAD Composites
     
     In addition, there is a `~/git/TdConfig/idd/pqacts/README.txt` file that may be helpful in writing a suitable `ldmd.conf` file.
 
@@ -227,7 +229,7 @@ Also, remember that these files will be used **inside** the LDM container that w
     In the `ldmd.conf` file we copied just a moment ago there is a reference to a `pqact` file; `etc/TDS/pqact.forecastModels`. We need to ensure that file exists by doing the following instructions. Specifically, explode `~/git/TdsConfig/idd/config.zip` into `~/tdsconfig` and `cp -r` the `pqacts` directory into `~/etc/TDS`. **Note** do NOT use soft links. Docker does not like them.
     
         mkdir -p ~/tdsconfig/
-        cp ~/git/tdsConfig/idd/config.zip ~/tdsconfig/
+        cp ~/git/TdsConfig/idd/config.zip ~/tdsconfig/
         unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
         cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
 
@@ -320,9 +322,9 @@ Let's first display the free disk space with the `df` command.
 <tr>
 <td class="org-left">/dev/sda1</td>
 <td class="org-left">31G</td>
-<td class="org-right">1.8G</td>
+<td class="org-right">2.0G</td>
 <td class="org-left">28G</td>
-<td class="org-right">6%</td>
+<td class="org-right">7%</td>
 <td class="org-left">/</td>
 <td class="org-left">&#xa0;</td>
 </tr>
@@ -342,7 +344,7 @@ Let's first display the free disk space with the `df` command.
 <tr>
 <td class="org-left">udev</td>
 <td class="org-left">7.4G</td>
-<td class="org-right">13k</td>
+<td class="org-right">8.2k</td>
 <td class="org-left">7.4G</td>
 <td class="org-right">1%</td>
 <td class="org-left">/dev</td>
@@ -560,38 +562,38 @@ From the shell where you started `docker-machine` earlier you can execute the fo
 
 
 <tr>
-<td class="org-left">32d3b20c8329</td>
+<td class="org-left">4ed1c4c18814</td>
 <td class="org-left">unidata/ramadda:latest</td>
 <td class="org-left">Up</td>
-<td class="org-right">5</td>
-<td class="org-left">days</td>
+<td class="org-right">17</td>
+<td class="org-left">seconds</td>
 </tr>
 
 
 <tr>
-<td class="org-left">594577bb15b9</td>
+<td class="org-left">bdfcf5590bc6</td>
 <td class="org-left">unidata/ldmtds:latest</td>
 <td class="org-left">Up</td>
-<td class="org-right">5</td>
-<td class="org-left">days</td>
+<td class="org-right">18</td>
+<td class="org-left">seconds</td>
 </tr>
 
 
 <tr>
-<td class="org-left">d86a3d33216f</td>
+<td class="org-left">aee044cf8e66</td>
 <td class="org-left">unidata/tdm:latest</td>
 <td class="org-left">Up</td>
-<td class="org-right">5</td>
-<td class="org-left">days</td>
+<td class="org-right">20</td>
+<td class="org-left">seconds</td>
 </tr>
 
 
 <tr>
-<td class="org-left">69fc06217d86</td>
+<td class="org-left">4d0208f85b22</td>
 <td class="org-left">unidata/tds:latest</td>
 <td class="org-left">Up</td>
-<td class="org-right">5</td>
-<td class="org-left">days</td>
+<td class="org-right">21</td>
+<td class="org-left">seconds</td>
 </tr>
 </tbody>
 </table>
