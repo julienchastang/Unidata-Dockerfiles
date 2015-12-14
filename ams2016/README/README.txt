@@ -50,7 +50,7 @@ _________________
 .. 8.2 TDS and RAMADDA URLs
 .. 8.3 Viewing Data with the IDV
 ..... 8.3.1 Access TDS with the IDV
-..... 8.3.2 Acess RAMADDAA with the IDV
+..... 8.3.2 Access RAMADDAA with the IDV
 
 
 
@@ -357,7 +357,7 @@ _________________
   you would have to edit the `registry.xml' to ensure the `hostname'
   element is correct. For your own cloud VMs, work with
   `support-idd@unidata.ucar.edu' to devise a correct `hostname' element
-  so that LDM statsitics get properly reported. Here is an example
+  so that LDM statistics get properly reported. Here is an example
   `hostname' element `unidata-server.azure.unidata.ucar.edu'.
 
 
@@ -529,7 +529,7 @@ _________________
    LDM                388 
   ------------------------
 
-  Note the TDM is an application that works in conjuction with the
+  Note the TDM is an application that works in conjunction with the
   TDS. It creates indexes for GRIB data in the background, and notifies
   the TDS via port 8443 when data have been updated or changed. See
   [here] to learn more about the TDM.
@@ -579,11 +579,11 @@ _________________
 7.0.2 Final Edit to `docker-compose.yml'
 ----------------------------------------
 
-  When the TDM communicates to the TDS concering changes in data it
+  When the TDM communicates to the TDS concerning changes in data it
   observes with data supplied by the LDM, it will communicate via the
   `tdm' tomcat user. Edit the `docker-compose.yml' file and change the
   `TDM_PW' to `MeIndexer'. This is not as insecure as it would seem
-  since the tdm user has few priviliges. Optimally, one could change the
+  since the tdm user has few privileges. Optimally, one could change the
   password hash for the TDM user in the `tomcat-users.xml' file.
 
 
@@ -592,7 +592,7 @@ _________________
 
   At this point you are almost ready to run the whole kit and
   caboodle. But first pull the relevant docker images to make this
-  easier for the subequent `docker-compose' command.
+  easier for the subsequent `docker-compose' command.
 
 
   ,----
@@ -680,17 +680,17 @@ _________________
   https://www.unidata.ucar.edu/software/idv/docs/userguide/data/choosers/CatalogChooser.html
 
 
-8.3.2 Acess RAMADDAA with the IDV
----------------------------------
+8.3.2 Access RAMADDAA with the IDV
+----------------------------------
 
-  RAMADDA has good integration with the IDV and the two technolgies work
-  well together. You may wish to install the [RAMADDA IDV plugin] to
-  publish IDV bundles to RAMADDA. RAMADDA also has access to the
+  RAMADDA has good integration with the IDV and the two technologies
+  work well together. You may wish to install the [RAMADDA IDV plugin]
+  to publish IDV bundles to RAMADDA. RAMADDA also has access to the
   `/data/ldm' directory so you may want to set up [server-side view of
-  this part of the file system]. Finally, you can enter this catlog URL
-  in the IDV dashbaord to examine data holdings shared bundles, etc. on
+  this part of the file system]. Finally, you can enter this catalog URL
+  in the IDV dashboard to examine data holdings shared bundles, etc. on
   RAMADDA
-  [http://unidata-server-2.cloudapp.net:8081/repository?output=thredds.catalog].
+  [http://unidata-server.cloudapp.net:8081/repository?output=thredds.catalog].
 
 
   [RAMADDA IDV plugin]

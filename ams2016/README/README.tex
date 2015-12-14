@@ -1,4 +1,4 @@
-% Created 2015-12-13 Sun 22:29
+% Created 2015-12-13 Sun 23:46
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -226,7 +226,7 @@ In addition, there is a \texttt{\textasciitilde{}/git/TdConfig/idd/pqacts/README
 cp ~/git/Unidata-Dockerfiles/ams2016/registry.xml ~/etc/
 \end{verbatim}
 
-This file has been set up for the AMS 2016 demonstration. Otherwise you would have to edit the \texttt{registry.xml} to ensure the \texttt{hostname} element is correct. For your own cloud VMs, work with \texttt{support-idd@unidata.ucar.edu} to devise a correct \texttt{hostname} element so that LDM statsitics get properly reported. Here is an example \texttt{hostname} element \texttt{unidata-server.azure.unidata.ucar.edu}.
+This file has been set up for the AMS 2016 demonstration. Otherwise you would have to edit the \texttt{registry.xml} to ensure the \texttt{hostname} element is correct. For your own cloud VMs, work with \texttt{support-idd@unidata.ucar.edu} to devise a correct \texttt{hostname} element so that LDM statistics get properly reported. Here is an example \texttt{hostname} element \texttt{unidata-server.azure.unidata.ucar.edu}.
 
 \item \texttt{scour.conf}
 \label{sec:orgheadline19}
@@ -370,7 +370,7 @@ LDM & 388\\
 \end{tabular}
 \end{center}
 
-Note the TDM is an application that works in conjuction with the TDS. It creates indexes for GRIB data in the background, and notifies the TDS via port 8443 when data have been updated or changed. See \href{https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html}{here} to learn more about the TDM.
+Note the TDM is an application that works in conjunction with the TDS. It creates indexes for GRIB data in the background, and notifies the TDS via port 8443 when data have been updated or changed. See \href{https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html}{here} to learn more about the TDM.
 
 \section{Tomcat Logging for TDS and RAMADDA}
 \label{sec:orgheadline32}
@@ -398,12 +398,12 @@ echo ramadda.install.password=changeme! > /data/repository/pw.properties
 \subsubsection{Final Edit to \texttt{docker-compose.yml}}
 \label{sec:orgheadline34}
 
-When the TDM communicates to the TDS concering changes in data it observes with data supplied by the LDM, it will communicate via the \texttt{tdm} tomcat user. Edit the \texttt{docker-compose.yml} file and change the \texttt{TDM\_PW} to \texttt{MeIndexer}. This is not as insecure as it would seem since the tdm user has few priviliges. Optimally, one could change the password hash for the TDM user in the \texttt{tomcat-users.xml} file.
+When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the \texttt{tdm} tomcat user. Edit the \texttt{docker-compose.yml} file and change the \texttt{TDM\_PW} to \texttt{MeIndexer}. This is not as insecure as it would seem since the tdm user has few privileges. Optimally, one could change the password hash for the TDM user in the \texttt{tomcat-users.xml} file.
 
 \subsubsection{Pull Down Images from the DockerHub Registry}
 \label{sec:orgheadline35}
 
-At this point you are almost ready to run the whole kit and caboodle. But first  pull the relevant docker images to make this easier for the subequent \texttt{docker-compose} command.
+At this point you are almost ready to run the whole kit and caboodle. But first  pull the relevant docker images to make this easier for the subsequent \texttt{docker-compose} command.
 
 
 \begin{verbatim}
@@ -470,8 +470,8 @@ Another way to verify your work is run the \href{https://www.unidata.ucar.edu/so
 
 In the \href{https://www.unidata.ucar.edu/software/idv/docs/userguide/data/choosers/CatalogChooser.html}{IDV Dashboard}, you should be able to enter the catalog XML URL: \url{http://unidata-server.cloudapp.net/thredds/catalog.xml}.  
 
-\subsubsection{Acess RAMADDAA with the IDV}
+\subsubsection{Access RAMADDAA with the IDV}
 \label{sec:orgheadline41}
 
-RAMADDA has good integration with the IDV and the two technolgies work well together. You may wish to install the \href{http://www.unidata.ucar.edu/software/idv/docs/workshop/savingstate/Ramadda.html}{RAMADDA IDV plugin} to publish IDV bundles to RAMADDA. RAMADDA also has access to the \texttt{/data/ldm} directory so you may want to set up \href{http://ramadda.org//repository/userguide/developer/filesystem.html}{server-side view of this part of the file system}. Finally,  you can enter this catlog URL in the IDV dashbaord to examine data holdings shared bundles, etc. on RAMADDA \url{http://unidata-server-2.cloudapp.net:8081/repository?output=thredds.catalog}.
+RAMADDA has good integration with the IDV and the two technologies work well together. You may wish to install the \href{http://www.unidata.ucar.edu/software/idv/docs/workshop/savingstate/Ramadda.html}{RAMADDA IDV plugin} to publish IDV bundles to RAMADDA. RAMADDA also has access to the \texttt{/data/ldm} directory so you may want to set up \href{http://ramadda.org//repository/userguide/developer/filesystem.html}{server-side view of this part of the file system}. Finally,  you can enter this catalog URL in the IDV dashboard to examine data holdings shared bundles, etc. on RAMADDA \url{http://unidata-server.cloudapp.net:8081/repository?output=thredds.catalog}.
 \end{document}
