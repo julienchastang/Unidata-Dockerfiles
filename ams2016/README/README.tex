@@ -1,4 +1,4 @@
-% Created 2015-12-15 Tue 12:55
+% Created 2015-12-15 Tue 13:28
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -64,7 +64,7 @@ At this point you are almost done. \texttt{ssh} into new Docker host:  \texttt{d
 
 See the section below about editing the \texttt{ldmfile.sh} to correctly handle logging.
 
-Run \texttt{\textasciitilde{}/git/Unidata-Dockerfiles/unicloud-3.sh}
+Run \texttt{\textasciitilde{}/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh}
 
 \section{Preamble}
 \label{sec:orgheadline2}
@@ -283,9 +283,8 @@ cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
 
 \item Edit \texttt{ldmfile.sh}
 \label{sec:orgheadline21}
-\label{orgtarget1}
 
-As the top of this file indicates, you must edit the \texttt{logfile} to suit your needs. Change the 
+Open the \texttt{etc/TDS/util/ldmfile.sh} file the editor of your choice. As the top of this file indicates, you must edit the \texttt{logfile} to suit your needs. Change the 
 
 \begin{verbatim}
 logfile=logs/ldm-mcidas.log
@@ -304,6 +303,7 @@ This will ensure \texttt{ldmfile.sh} can properly invoked from the \texttt{pqact
 \label{sec:orgheadline23}
 
 The LDM operates on a push data model. You will have to find someone who will agree to push you the data. If you are part of the American academic community please send a support email to \texttt{support-idd@unidata.ucar.edu} to discuss your LDM data requirements.
+
 \subsection{Configuring the TDS}
 \label{sec:orgheadline26}
 \subsubsection{Edit TDS catalog.xml Files}

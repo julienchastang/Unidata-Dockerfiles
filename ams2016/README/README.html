@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2015-12-15 Tue 12:55 -->
+<!-- 2015-12-15 Tue 13:28 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>AMS 2016: UniCloud, Docker at Unidata</title>
@@ -251,7 +251,7 @@ At this point you may or may not see an error message pertaining to regenerating
 <div class="org-src-container">
 
 <pre class="src src-sh">docker-machine regenerate-certs &lt;azure-host&gt;
-<span style="color: #006FE0;">eval</span> <span style="color: #008000;">"$(docker-machine env &lt;azure-host&gt;)"</span>
+<span style="color: #0000ff; font-weight: bold;">eval</span> <span style="color: #00ff00;">"$(docker-machine env &lt;azure-host&gt;)"</span>
 </pre>
 </div>
 
@@ -261,7 +261,7 @@ Now you are ready to do additional set up on the new Docker host:
 
 <div class="org-src-container">
 
-<pre class="src src-sh">docker-machine ssh &lt;azure-host&gt; <span style="color: #008000;">"bash -s"</span> &lt; <span style="color: #008000;">\</span>
+<pre class="src src-sh">docker-machine ssh &lt;azure-host&gt; <span style="color: #00ff00;">"bash -s"</span> &lt; <span style="color: #00ff00;">\</span>
     Unidata-Dockerfiles/ams2016/unicloud-2.sh
 </pre>
 </div>
@@ -275,7 +275,7 @@ See the section below about editing the <code>ldmfile.sh</code> to correctly han
 </p>
 
 <p>
-Run <code>~/git/Unidata-Dockerfiles/unicloud-3.sh</code>
+Run <code>~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh</code>
 </p>
 </div>
 </div>
@@ -314,7 +314,7 @@ The following <code>docker-machine</code> command will create a Docker VM on Azu
 
 <div class="org-src-container">
 
-<pre class="src src-org"><span style="color: #8D8D84; font-style: italic;"># Create Azure VM via docker-machine</span>
+<pre class="src src-org"><span style="color: #ff0000;"># Create Azure VM via docker-machine</span>
 docker-machine -D create -d azure \
                --azure-subscription-id=$AZURE_ID \
                --azure-subscription-cert=$AZURE_CERT \
@@ -364,9 +364,9 @@ At the very least, we will need <code>unzip</code> on the Azure Docker host.
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #006FE0;">set</span> -x 
+<pre class="src src-sh"><span style="color: #0000ff; font-weight: bold;">set</span> -x 
 
-<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">update and install package(s)</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">update and install package(s)</span>
 sudo apt-get -qq update
 sudo apt-get -qq install unzip
 </pre>
@@ -379,10 +379,10 @@ sudo apt-get -qq install unzip
 <div class="outline-text-3" id="text-3-7">
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Add ubuntu to docker group</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Add ubuntu to docker group</span>
 sudo usermod -G docker ubuntu
 
-<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Restart docker service</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">Restart docker service</span>
 sudo service docker restart
 </pre>
 </div>
@@ -402,9 +402,9 @@ sudo service docker restart
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Get docker-compose</span>
-curl -L <span style="color: #008000;">\</span>
-https://github.com/docker/compose/releases/download/1.5.2/docker-compose-<span style="color: #FF1493;">`uname -s`</span>-<span style="color: #FF1493;">`uname -m`</span> <span style="color: #008000;">\</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Get docker-compose</span>
+curl -L <span style="color: #00ff00;">\</span>
+https://github.com/docker/compose/releases/download/1.5.2/docker-compose-<span style="color: #ff00ff;">`uname -s`</span>-<span style="color: #ff00ff;">`uname -m`</span> <span style="color: #00ff00;">\</span>
       &gt; docker-compose
 sudo mv docker-compose /usr/local/bin/
 sudo chmod +x /usr/local/bin/docker-compose
@@ -458,9 +458,9 @@ With that background information out of the way, let's clone those repositories 
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Get the git repositories we will want to work with</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Get the git repositories we will want to work with</span>
 mkdir -p /home/ubuntu/git
-git clone https://github.com/Unidata/Unidata-Dockerfiles <span style="color: #008000;">\</span>
+git clone https://github.com/Unidata/Unidata-Dockerfiles <span style="color: #00ff00;">\</span>
     /home/ubuntu/git/Unidata-Dockerfiles
 git clone https://github.com/Unidata/TdsConfig /home/ubuntu/git/TdsConfig
 </pre>
@@ -493,7 +493,7 @@ The LDM <code>etc</code> directory is where you will find configuration files re
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Create LDM directories</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Create LDM directories</span>
 mkdir -p ~/var/logs 
 mkdir -p ~/etc/TDS
 </pre>
@@ -514,7 +514,7 @@ There is a generic set of LDM configuration files located here <code>~/git/Unida
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Copy various files for the LDM.</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Copy various files for the LDM.</span>
 cp ~/git/Unidata-Dockerfiles/ldm/etc/netcheck.conf ~/etc
 </pre>
 </div>
@@ -586,7 +586,7 @@ In the <code>ldmd.conf</code> file we copied just a moment ago there is a refere
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Set up LDM and TDS configuration</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Set up LDM and TDS configuration</span>
 mkdir -p ~/tdsconfig/
 cp ~/git/TdsConfig/idd/config.zip ~/tdsconfig/
 unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
@@ -597,11 +597,7 @@ cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
 
 <li><a id="orgheadline21"></a>Edit <code>ldmfile.sh</code><br  /><div class="outline-text-5" id="text-4-3-2-5">
 <p>
-<a id="orgtarget1"></a>
-</p>
-
-<p>
-As the top of this file indicates, you must edit the <code>logfile</code> to suit your needs. Change the 
+Open the <code>etc/TDS/util/ldmfile.sh</code> file the editor of your choice. As the top of this file indicates, you must edit the <code>logfile</code> to suit your needs. Change the 
 </p>
 
 <pre class="example">
@@ -631,6 +627,7 @@ The LDM operates on a push data model. You will have to find someone who will ag
 </div>
 </div>
 </div>
+
 <div id="outline-container-orgheadline26" class="outline-3">
 <h3 id="orgheadline26"><span class="section-number-3">4.4</span> Configuring the TDS</h3>
 <div class="outline-text-3" id="text-4-4">
@@ -647,7 +644,7 @@ Let's see what is available in the <code>~/tdsconfig</code> directory.
 
 <div class="org-src-container">
 
-<pre class="src src-sh">find ~/tdsconfig -type f -name <span style="color: #008000;">"*.xml"</span>
+<pre class="src src-sh">find ~/tdsconfig -type f -name <span style="color: #00ff00;">"*.xml"</span>
 </pre>
 </div>
 
@@ -831,7 +828,7 @@ Create a <code>/data</code> directory where the LDM can write data soft link to 
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Set up data directories</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Set up data directories</span>
 sudo ln -s /mnt /data
 sudo mkdir /mnt/ldm/
 sudo chown -R ubuntu:docker /data/ldm
@@ -911,7 +908,7 @@ It is a good idea to mount Tomcat logging directories outside the container so t
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Create Tomcat logging directories</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Create Tomcat logging directories</span>
 mkdir -p ~/logs/ramadda-tomcat
 mkdir -p ~/logs/tds-tomcat
 </pre>
@@ -935,8 +932,8 @@ When you start RAMADDA for the very first time, you must have  a <code>password.
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Create RAMADDA default password</span>
-<span style="color: #006FE0;">echo</span> ramadda.install.password=changeme! &gt; /data/repository/pw.properties
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Create RAMADDA default password</span>
+<span style="color: #0000ff; font-weight: bold;">echo</span> ramadda.install.password=changeme! &gt; /data/repository/pw.properties
 </pre>
 </div>
 </div>
@@ -961,9 +958,9 @@ At this point you are almost ready to run the whole kit and caboodle. But first 
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #006FE0;">set</span> -x
+<pre class="src src-sh"><span style="color: #0000ff; font-weight: bold;">set</span> -x
 
-<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Docker pull all relavant images</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">Docker pull all relavant images</span>
 docker pull unidata/ldmtds:latest
 docker pull unidata/tdm:latest
 docker pull unidata/tds:latest
@@ -982,7 +979,7 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Start up all images</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Start up all images</span>
 docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 </pre>
 </div>
@@ -1018,7 +1015,7 @@ From the shell where you started <code>docker-machine</code> earlier you can exe
 
 <div class="org-src-container">
 
-<pre class="src src-sh" id="orgsrcblock2">docker ps --format <span style="color: #008000;">"table {{.ID}}\t{{.Image}}\t{{.Status}}"</span>
+<pre class="src src-sh" id="orgsrcblock2">docker ps --format <span style="color: #00ff00;">"table {{.ID}}\t{{.Image}}\t{{.Status}}"</span>
 </pre>
 </div>
 
@@ -1122,7 +1119,7 @@ RAMADDA has good integration with the IDV and the two technologies work well tog
 <div id="postamble" class="status">
 <p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-12-08 Tue&gt;</span></span></p>
 <p class="author">Author: Julien Chastang</p>
-<p class="date">Created: 2015-12-15 Tue 12:55</p>
+<p class="date">Created: 2015-12-15 Tue 13:28</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

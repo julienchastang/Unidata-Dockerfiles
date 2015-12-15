@@ -98,7 +98,7 @@ At this point you are almost done. =ssh= into new Docker host:  =docker-machine 
 See the section below about editing the =ldmfile.sh= to correctly handle logging.
 
 # Get docker images going with this script
-Run =~/git/Unidata-Dockerfiles/unicloud-3.sh=
+Run =~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh=
 
 * Preamble
 
@@ -375,7 +375,7 @@ In the =ldmd.conf= file we copied just a moment ago there is a reference to a =p
 
 **** Edit =ldmfile.sh=
 
-As the top of this file indicates, you must edit the =logfile= to suit your needs. Change the 
+Open the =etc/TDS/util/ldmfile.sh= file the editor of your choice. As the top of this file indicates, you must edit the =logfile= to suit your needs. Change the 
 
 #+BEGIN_EXAMPLE
 logfile=logs/ldm-mcidas.log

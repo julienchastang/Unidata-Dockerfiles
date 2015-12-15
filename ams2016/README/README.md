@@ -98,7 +98,7 @@ At this point you are almost done. `ssh` into new Docker host:  `docker-machine 
 
 See the section below about editing the `ldmfile.sh` to correctly handle logging.
 
-Run `~/git/Unidata-Dockerfiles/unicloud-3.sh`
+Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh`
 
 # Preamble<a id="orgheadline2"></a>
 
@@ -262,9 +262,7 @@ Also, remember that these files will be used **inside** the LDM container that w
 
 5.  Edit `ldmfile.sh`
 
-    <a id="orgtarget1"></a>
-    
-    As the top of this file indicates, you must edit the `logfile` to suit your needs. Change the 
+    Open the `etc/TDS/util/ldmfile.sh` file the editor of your choice. As the top of this file indicates, you must edit the `logfile` to suit your needs. Change the 
     
         logfile=logs/ldm-mcidas.log
     

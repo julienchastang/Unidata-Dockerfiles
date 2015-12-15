@@ -92,7 +92,7 @@ _________________
   See the section below about editing the `ldmfile.sh' to correctly
   handle logging.
 
-  Run `~/git/Unidata-Dockerfiles/unicloud-3.sh'
+  Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh'
 
 
   [Download and install]
@@ -446,9 +446,8 @@ _________________
 
 * 4.3.2.5 Edit `ldmfile.sh'
 
-
-
-  As the top of this file indicates, you must edit the `logfile' to suit
+  Open the `etc/TDS/util/ldmfile.sh' file the editor of your choice. As
+  the top of this file indicates, you must edit the `logfile' to suit
   your needs. Change the
 
   ,----
