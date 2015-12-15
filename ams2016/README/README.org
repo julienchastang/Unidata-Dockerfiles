@@ -102,16 +102,24 @@ docker-machine -D create -d azure \
 
 #+END_SRC
 
-#+INCLUDE: "/tmp/azure.sh" src org 
+#+INCLUDE: "../unicloud-1.sh" src org 
 
 ** Configure Unix Shell to Interact with New Azure VM.
 
 Execute the following command =eval= in your local computer shell environment to ensure that =docker= commands will be run with the newly created Docker host.
 
 #+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports none :eval no
-
   # Ensure docker commands will be run with new host
   eval "$(docker-machine env <<myvm>>)"
+#+END_SRC
+
+** Restart Azure VM
+
+Mysteriously, when you =ssh= (see next section) into the fresh VM, you are immediately told to restart it so let's preempt that message by doing that now.
+
+#+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports none :eval no
+  # immediately restart VM, according to Azure
+  docker-machine restart <<myvm>>
 #+END_SRC
 
 ** =ssh= into VM with =docker-machine=
@@ -150,29 +158,6 @@ docker stop/waiting
 docker start/running, process 29917
 :END:
 
-** Restart Azure VM
-
-At this point, we want to restart the VM to get a fresh start. This command may take a little while...
-
-#+BEGIN_SRC sh :dir ~ :noweb yes :results verbatim drawer :exports code :tangle ../unicloud-3.sh :shebang "#!/bin/bash"
-  set -x 
-
-  # Restart the VM and run eval again
-  docker-machine restart <<myvm>>
-  eval "$(docker-machine env <<myvm>>)"
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-Restarted machines may have new IP addresses. You may need to re-run the `docker-machine env` command.
-:END:
-
-** =ssh= into VM
-
-#+BEGIN_SRC sh :dir ~ :eval no :noweb yes 
-  docker-machine ssh <<myvm>>
-#+END_SRC
-
 ** Install =docker-compose= on VM
 
  #+BEGIN_SRC org :noweb-ref dcompose-version :exports none 
@@ -188,9 +173,7 @@ Restarted machines may have new IP addresses. You may need to re-run the `docker
  #+RESULTS:
  "You may have to update version (currently at =1.5.2=).
 
- #+BEGIN_SRC sh :noweb yes :results verbatim drawer :exports code :tangle ../unicloud-4.sh :shebang "#!/bin/bash"
-  set -x 
-
+ #+BEGIN_SRC sh :noweb yes :results verbatim drawer :exports code :tangle ../unicloud-2.sh 
   # Get docker-compose
   curl -L \
   https://github.com/docker/compose/releases/download/<<dcompose-version>>/docker-compose-`uname -s`-`uname -m` \
@@ -223,7 +206,7 @@ The =TDSConfig= repository is a project that captures THREDDS and LDM configurat
 
 With that background information out of the way, let's clone those repositories by creating =~/git= directory where our repositories will live and issuing some =git= commands.
 
-#+BEGIN_SRC sh :results silent :tangle ../unicloud-4.sh
+#+BEGIN_SRC sh :results silent :tangle ../unicloud-2.sh
   
   # Get the git repositories we will want to work with
   mkdir -p /home/ubuntu/git
@@ -246,7 +229,7 @@ For anyone who has worked with the LDM, you may be familiar with the following d
 
 The LDM =etc= directory is where you will find configuration files related to the LDM including =ldmd.conf=, =pqact= files, =registry.xml=, and  =scour.conf=. We will need the ability to easily observe and manipulate the files from *outside* the running LDM container. To that end, we need to find a home for =etc= on the Docker host. The same is true for the =var/data= and =var/logs= directories. Later, we will use Docker commands that have been written on your behalf to mount these directories from *outside* to *within* the container. The =var/queues= directory will remain inside the container.
 
-#+BEGIN_SRC sh  :results silent :tangle ../unicloud-4.sh
+#+BEGIN_SRC sh  :results silent :tangle ../unicloud-2.sh
   # Create LDM directories
   mkdir -p ~/var/logs 
   mkdir -p ~/etc/TDS
@@ -258,7 +241,7 @@ The LDM =etc= directory is where you will find configuration files related to th
 
 There is a generic set of LDM configuration files located here =~/git/Unidata-Dockerfiles/ldm/etc/=. However, we will just grab =netcheck.conf= which will remain unmodified.
 
-#+BEGIN_SRC sh :results silent :exports code :tangle ../unicloud-4.sh
+#+BEGIN_SRC sh :results silent :exports code :tangle ../unicloud-2.sh
   # Copy various files for the LDM.
   cp ~/git/Unidata-Dockerfiles/ldm/etc/netcheck.conf ~/etc
 #+END_SRC
@@ -273,7 +256,7 @@ Also, remember that these files will be used *inside* the LDM container that we 
 
 **** =ldmd.conf=
 
- #+BEGIN_SRC sh :results silent :exports code :tangle ../unicloud-4.sh
+ #+BEGIN_SRC sh :results silent :exports code :tangle ../unicloud-2.sh
    cp ~/git/Unidata-Dockerfiles/ams2016/ldmd.conf ~/etc/
  #+END_SRC
 
@@ -286,7 +269,7 @@ Also, remember that these files will be used *inside* the LDM container that we 
 
 **** =registry.xml=
 
- #+BEGIN_SRC sh  :results silent :exports code :tangle ../unicloud-4.sh
+ #+BEGIN_SRC sh  :results silent :exports code :tangle ../unicloud-2.sh
    cp ~/git/Unidata-Dockerfiles/ams2016/registry.xml ~/etc/
  #+END_SRC
 
@@ -301,7 +284,7 @@ Also, remember that these files will be used *inside* the LDM container that we 
 
 You need to scour data or else your disk will full up. The crontab entry that runs scour is in the [[https://github.com/Unidata/Unidata-Dockerfiles/blob/master/ldm/crontab][LDM Docker container]]. Scouring is invoked once per day.
 
-  #+BEGIN_SRC sh  :results silent :tangle ../unicloud-4.sh
+  #+BEGIN_SRC sh  :results silent :tangle ../unicloud-2.sh
     cp ~/git/Unidata-Dockerfiles/ams2016/scour.conf ~/etc/
   #+END_SRC
 
@@ -309,7 +292,7 @@ You need to scour data or else your disk will full up. The crontab entry that ru
 
 In the =ldmd.conf= file we copied just a moment ago there is a reference to a =pqact= file; =etc/TDS/pqact.forecastModels=. We need to ensure that file exists by doing the following instructions. Specifically, explode =~/git/TdsConfig/idd/config.zip= into =~/tdsconfig= and =cp -r= the =pqacts= directory into =~/etc/TDS=. *Note* do NOT use soft links. Docker does not like them.
 
-#+BEGIN_SRC sh  :results silent :tangle ../unicloud-4.sh
+#+BEGIN_SRC sh  :results silent :tangle ../unicloud-2.sh
   # Set up LDM and TDS configuration
   mkdir -p ~/tdsconfig/
   cp ~/git/TdsConfig/idd/config.zip ~/tdsconfig/
@@ -401,7 +384,7 @@ Let's first display the free disk space with the =df= command.
 
 Create a =/data= directory where the LDM can write data soft link to the =/mnt= directory. Also, create a =/repository= directory where RAMADDA data will reside.
 
-#+BEGIN_SRC sh :results silent :tangle ../unicloud-4.sh
+#+BEGIN_SRC sh :results silent :tangle ../unicloud-2.sh
   # Set up data directories
   sudo ln -s /mnt /data
   sudo mkdir /mnt/ldm/
@@ -432,7 +415,7 @@ Note the TDM is an application that works in conjunction with the TDS. It create
 
 It is a good idea to mount Tomcat logging directories outside the container so that they can be managed for both the TDS and RAMADDA.
 
-#+BEGIN_SRC sh :results silent :tangle ../unicloud-4.sh
+#+BEGIN_SRC sh :results silent :tangle ../unicloud-2.sh
   # Create Tomcat logging directories
   mkdir -p ~/logs/ramadda-tomcat
   mkdir -p ~/logs/tds-tomcat
@@ -445,7 +428,7 @@ Note there is also a logging directory in =~/tdsconfig/logs=. All these logging 
 
 When you start RAMADDA for the very first time, you must have  a =password.properties= file in the RAMADDA home directory which is =/data/repository/=. See [[http://ramadda.org//repository/userguide/toc.html][RAMADDA documentation]] for more details on setting up RAMADDA. Here is a =pw.properties= file to get you going. Change password below to something more secure!
 
-#+BEGIN_SRC sh :results silent :tangle ../unicloud-4.sh
+#+BEGIN_SRC sh :results silent :tangle ../unicloud-2.sh
   # Create RAMADDA default password
   echo ramadda.install.password=changeme! > /data/repository/pw.properties
 #+END_SRC
@@ -465,7 +448,7 @@ At this point you are almost ready to run the whole kit and caboodle. But first 
 
 # Run this command directly on remote host; it takes too long.
 
-#+BEGIN_SRC sh :results silent :eval no :tangle ../unicloud-4.sh
+#+BEGIN_SRC sh :results silent :eval no :tangle ../unicloud-2.sh
   # Docker pull all relavant images
   docker pull unidata/ldmtds:latest
   docker pull unidata/tdm:latest
@@ -477,7 +460,7 @@ At this point you are almost ready to run the whole kit and caboodle. But first 
 
 We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following =docker-compose= command.
 
-#+BEGIN_SRC sh :results silent :tangle ../unicloud-4.sh
+#+BEGIN_SRC sh :results silent :tangle ../unicloud-2.sh
   # Start up all images
   docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 #+END_SRC

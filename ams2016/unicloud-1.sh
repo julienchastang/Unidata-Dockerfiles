@@ -9,3 +9,6 @@ docker-machine -D create -d azure \
 
 # Ensure docker commands will be run with new host
 eval "$(docker-machine env unidata-server)"
+
+# immediately restart VM, according to Azure
+docker-machine restart unidata-server
