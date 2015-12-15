@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2015-12-15 Tue 09:53 -->
+<!-- 2015-12-15 Tue 11:23 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>AMS 2016: UniCloud, Docker at Unidata</title>
@@ -242,11 +242,24 @@ In order to understand what you are doing, it is best read the complete contents
 <li><code>git clone https://github.com/Unidata/Unidata-Dockerfiles</code></li>
 <li><a href="https://docs.docker.com/machine/install-machine/">Download and install</a> <code>docker-machine</code></li>
 <li>Run the <code>Unidata-Dockerfiles/ams2016/unicloud-1.sh</code> (this will take few minutes)</li>
-<li><code>ssh ubuntu@unidata-server.cloudapp.net "bash -s" &lt; Unidata-Dockerfiles/ams2016/unicloud-2.sh</code> (this will take few minutes)</li>
+<li><code>docker-machine ssh unidata-server "bash -s" &lt; Unidata-Dockerfiles/ams2016/unicloud-2.sh</code> (this will take few minutes)</li>
 </ul>
+
 
 <p>
 At this point you are almost done. You just need to <code>docker-machine ssh</code> into your new 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-org">docker-machine ssh unidata-server
+<span style="color: #8D8D84; font-style: italic;"># Get docker images going with this script</span>
+~/git/Unidata-Dockerfiles/unicloud-3.sh
+</pre>
+</div>
+<p>
+docker-machine ssh unidata-server
+~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh
 </p>
 </div>
 </div>
@@ -283,26 +296,47 @@ The instructions assume we will create an Azure VM called <code>unidata-server.c
 The following <code>docker-machine</code> command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply <code>azure-subscription-id</code> and <code>azure-subscription-cert</code> path. See these Azure <code>docker-machine</code> <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/">instructions</a>, if you have questions about this process. Also the the size of the VM is currently set to <code>ExtraLarge</code>. See <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/">here</a> to learn more about sizes for virtual machines.
 </p>
 
-
 <div class="org-src-container">
 
 <pre class="src src-org">#!/bin/bash
 set -x 
 
+usage="$(basename "$0") [-h] [-ah, --azure-host] -- script to set up Azure 
+Docker Host:\n
+    -h  show this help text\n
+    -ah, --azure-host name of Docker host on Azure\n"
+
+AZURE_HOST=unidata-server
+
+while <span style="color: #006DAF; text-decoration: underline;"><a href=" $# &gt; 0 "> $# &gt; 0 </a></span>
+do
+    key="$1"
+    case $key in
+        -ah|--azure-host)
+            AZURE_HOST="$2"
+            shift # past argument
+            ;;
+        -h|--help)
+            echo $usage
+            exit
+            ;;
+    esac
+    shift # past argument or value
+done
+
 <span style="color: #8D8D84; font-style: italic;"># Create Azure VM via docker-machine</span>
 docker-machine -D create -d azure \
-               --azure-subscription-id="3.141" \
-               --azure-subscription-cert="/path/to/mycert.pem" \
-               --azure-size="ExtraLarge" unidata-server
+               --azure-subscription-id="c0a346f1-bba3-4a6d-bd0c-a553ec979e3a" \
+               --azure-subscription-cert="<span style="color: #1A1A1A; font-style: italic;">/Users/chastang/</span>.ssh/mycert.pem" \
+               --azure-size="ExtraLarge" $AZURE_HOST
 
 <span style="color: #8D8D84; font-style: italic;"># Ensure docker commands will be run with new host</span>
-eval "$(docker-machine env unidata-server)"
+eval "$(docker-machine env $AZURE_HOST)"
 
 <span style="color: #8D8D84; font-style: italic;"># immediately restart VM, according to Azure</span>
-docker-machine restart unidata-server
-
+docker-machine restart $AZURE_HOST
 <span style="color: #8D8D84; font-style: italic;"># Again, ensure docker commands will be run with new host</span>
-eval "$(docker-machine env unidata-server)"
+eval "$(docker-machine env $AZURE_HOST)"
 </pre>
 </div>
 </div>
@@ -1102,7 +1136,7 @@ RAMADDA has good integration with the IDV and the two technologies work well tog
 <div id="postamble" class="status">
 <p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-12-08 Tue&gt;</span></span></p>
 <p class="author">Author: Julien Chastang</p>
-<p class="date">Created: 2015-12-15 Tue 09:53</p>
+<p class="date">Created: 2015-12-15 Tue 11:23</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

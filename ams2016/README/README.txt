@@ -69,12 +69,21 @@ _________________
   - [Download and install] `docker-machine'
   - Run the `Unidata-Dockerfiles/ams2016/unicloud-1.sh' (this will take
     few minutes)
-  - `ssh ubuntu@unidata-server.cloudapp.net "bash -s" <
+  - `docker-machine ssh unidata-server "bash -s" <
     Unidata-Dockerfiles/ams2016/unicloud-2.sh' (this will take few
     minutes)
 
+
   At this point you are almost done. You just need to `docker-machine
   ssh' into your new
+
+  ,----
+  | docker-machine ssh unidata-server
+  | # Get docker images going with this script
+  | ~/git/Unidata-Dockerfiles/unicloud-3.sh
+  `----
+  docker-machine ssh unidata-server
+  ~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh
 
 
   [Download and install]
@@ -145,25 +154,46 @@ _________________
   `ExtraLarge'. See [here] to learn more about sizes for virtual
   machines.
 
-
   ,----
   | #!/bin/bash
   | set -x 
   | 
+  | usage="$(basename "$0") [-h] [-ah, --azure-host] -- script to set up Azure 
+  | Docker Host:\n
+  |     -h  show this help text\n
+  |     -ah, --azure-host name of Docker host on Azure\n"
+  | 
+  | AZURE_HOST=unidata-server
+  | 
+  | while [[ $# > 0 ]]
+  | do
+  |     key="$1"
+  |     case $key in
+  |         -ah|--azure-host)
+  |             AZURE_HOST="$2"
+  |             shift # past argument
+  |             ;;
+  |         -h|--help)
+  |             echo $usage
+  |             exit
+  |             ;;
+  |     esac
+  |     shift # past argument or value
+  | done
+  | 
   | # Create Azure VM via docker-machine
   | docker-machine -D create -d azure \
-  |                --azure-subscription-id="3.141" \
-  |                --azure-subscription-cert="/path/to/mycert.pem" \
-  |                --azure-size="ExtraLarge" unidata-server
+  |                --azure-subscription-id="c0a346f1-bba3-4a6d-bd0c-a553ec979e3a" \
+  |                --azure-subscription-cert="/Users/chastang/.ssh/mycert.pem" \
+  |                --azure-size="ExtraLarge" $AZURE_HOST
   | 
   | # Ensure docker commands will be run with new host
-  | eval "$(docker-machine env unidata-server)"
+  | eval "$(docker-machine env $AZURE_HOST)"
   | 
   | # immediately restart VM, according to Azure
-  | docker-machine restart unidata-server
-  | 
+  | docker-machine restart $AZURE_HOST
   | # Again, ensure docker commands will be run with new host
-  | eval "$(docker-machine env unidata-server)"
+  | eval "$(docker-machine env $AZURE_HOST)"
   `----
 
 

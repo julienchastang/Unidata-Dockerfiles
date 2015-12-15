@@ -79,21 +79,28 @@ In order to understand what you are doing, it is best read the complete contents
    - =git clone https://github.com/Unidata/Unidata-Dockerfiles=
    - [[https://docs.docker.com/machine/install-machine/][Download and install]] =docker-machine=
    - Run the =Unidata-Dockerfiles/ams2016/unicloud-1.sh= (this will take few minutes)
-   - =ssh ubuntu@<<myvm>>.cloudapp.net "bash -s" < Unidata-Dockerfiles/ams2016/unicloud-2.sh= (this will take few minutes)
+   - =docker-machine ssh <<myvm>> "bash -s" < Unidata-Dockerfiles/ams2016/unicloud-2.sh= (this will take few minutes)
 #+END_SRC
 
  #+RESULTS:
  - =git clone https://github.com/Unidata/Unidata-Dockerfiles=
  - [[https://docs.docker.com/machine/install-machine/][Download and install]] =docker-machine=
  - Run the =Unidata-Dockerfiles/ams2016/unicloud-1.sh= (this will take few minutes)
- - =ssh ubuntu@unidata-server.cloudapp.net "bash -s" < Unidata-Dockerfiles/ams2016/unicloud-2.sh= (this will take few minutes)
+ - =docker-machine ssh unidata-server "bash -s" < Unidata-Dockerfiles/ams2016/unicloud-2.sh= (this will take few minutes)
+
 
 At this point you are almost done. You just need to =docker-machine ssh= into your new 
 
-#+BEGIN_SRC sh :eval no :results silent :noweb yes :exports none
+#+BEGIN_SRC org  :noweb yes :exports code :results append
 docker-machine ssh <<myvm>>
+# Get docker images going with this script
 ~/git/Unidata-Dockerfiles/unicloud-3.sh
 #+END_SRC
+
+#+RESULTS:
+docker-machine ssh unidata-server
+# Get docker images going with this script
+~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh
 
 * Preamble
 
@@ -113,16 +120,59 @@ The instructions assume we will create an Azure VM called =unidata-server.clouda
 
 The following =docker-machine= command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply =azure-subscription-id= and =azure-subscription-cert= path. See these Azure =docker-machine= [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][instructions]], if you have questions about this process. Also the the size of the VM is currently set to =ExtraLarge=. See [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/][here]] to learn more about sizes for virtual machines.
 
+#+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh :shebang "#!/bin/bash" :exports none
+  set -x 
+
+  usage="$(basename "$0") [-h] [--azure-host] [--azure-host]  [--azure-subscription-id]  [--azure-subscription-cert]  [--azure-size] -- script to set up Azure Docker Host:\n
+      -h  show this help text\n
+      --azure-host name of Docker host on Azure\n
+      --azure-subscription-id Azure subscription ID\n
+      --azure-subscription-cert Azure subscription (.pem) certificate\n
+      --azure-size name of Docker host on Azure\n"
+
+  AZURE_HOST=<<myvm>>
+  AZURE_ID="3.14"
+  AZURE_CERT="/path/to/cert.pm"
+  AZURE_SIZE="ExtraSmall"
+
+  while [[ $# > 0 ]]
+  do
+      key="$1"
+      case $key in
+          --azure-host)
+              AZURE_HOST="$2"
+              shift # past argument
+              ;;
+          --azure-subscription-id)
+              AZURE_ID="$2"
+              shift # past argument
+              ;;
+          --azure-subscription-cert)
+              AZURE_CERT="$2"
+              shift # past argument
+              ;;
+          --azure-size)
+              AZURE_SIZE="$2"
+              shift # past argument
+              ;;
+          -h|--help)
+              echo $usage
+              exit
+              ;;
+      esac
+      shift # past argument or value
+  done
+#+END_SRC
+
 # Don't execute the following code block in this buffer; it will take too long. Instead =org-babel-tangle= with a prefix argument; C-u C-c C-v t. Then execute from the command line =/tmp/azure.sh=.
 
-#+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh :shebang "#!/bin/bash"  :exports none :eval no
-set -x 
+#+BEGIN_SRC org :noweb yes :dir ~  :exports none :eval no :tangle ../unicloud-1.sh
 
 # Create Azure VM via docker-machine
 docker-machine -D create -d azure \
-               --azure-subscription-id="3.141" \
-               --azure-subscription-cert="/path/to/mycert.pem" \
-               --azure-size="ExtraLarge" <<myvm>>
+               --azure-subscription-id=$AZURE_ID \
+               --azure-subscription-cert=$AZURE_CERT \
+               --azure-size=$AZURE_SIZE
 
 #+END_SRC
 
@@ -134,7 +184,7 @@ Execute the following command =eval= in your local computer shell environment to
 
 #+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports none :eval no
   # Ensure docker commands will be run with new host
-  eval "$(docker-machine env <<myvm>>)"
+  eval "$(docker-machine env $AZURE_HOST)"
 #+END_SRC
 
 ** Restart Azure VM
@@ -143,9 +193,9 @@ Mysteriously, when you =ssh= (see next section) into the fresh VM, you are immed
 
 #+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports none :eval no
   # immediately restart VM, according to Azure
-  docker-machine restart <<myvm>>
+  docker-machine restart $AZURE_HOST
   # Again, ensure docker commands will be run with new host
-  eval "$(docker-machine env <<myvm>>)"
+  eval "$(docker-machine env $AZURE_HOST)"
 #+END_SRC
 
 ** =ssh= into VM with =docker-machine=
