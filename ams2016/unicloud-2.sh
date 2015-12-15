@@ -8,6 +8,9 @@ sudo apt-get -qq install unzip
 # Add ubuntu to docker group
 sudo usermod -G docker ubuntu
 
+# Ensure docker group immediately takes effect on user ubuntu
+su - ubuntu
+
 # Restart docker service
 sudo service docker restart
 
@@ -56,12 +59,3 @@ mkdir -p ~/logs/tds-tomcat
 
 # Create RAMADDA default password
 echo ramadda.install.password=changeme! > /data/repository/pw.properties
-
-# Docker pull all relavant images
-docker pull unidata/ldmtds:latest
-docker pull unidata/tdm:latest
-docker pull unidata/tds:latest
-docker pull unidata/ramadda:latest
-
-# Start up all images
-docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
