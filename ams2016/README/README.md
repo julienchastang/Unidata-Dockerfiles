@@ -82,17 +82,23 @@ In order to understand what you are doing, it is best read the complete contents
 
 -   `git clone https://github.com/Unidata/Unidata-Dockerfiles`
 -   [Download and install](https://docs.docker.com/machine/install-machine/) `docker-machine`
--   Run the `Unidata-Dockerfiles/ams2016/unicloud-1.sh` (this will take few minutes)
--   `docker-machine ssh unidata-server "bash -s" < Unidata-Dockerfiles/ams2016/unicloud-2.sh` (this will take few minutes)
+-   Run the `Unidata-Dockerfiles/ams2016/unicloud-1.sh [--azure-host] [--azure-host]  [--azure-subscription-id]  [--azure-subscription-cert]  [--azure-size]` script (this will take few minutes)
 
-At this point you are almost done. You just need to `docker-machine ssh` into your new 
+At this point you may or may not see an error message pertaining to regenerating the certificates. In this case you will have to:
 
-    docker-machine ssh unidata-server
-    # Get docker images going with this script
-    ~/git/Unidata-Dockerfiles/unicloud-3.sh
+    docker-machine regenerate-certs <azure-host>
+    eval "$(docker-machine env <azure-host>)"
 
-docker-machine ssh unidata-server
-~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh
+Now you are ready to do additional set up on the new Docker host:
+
+    docker-machine ssh <azure-host> "bash -s" < \
+        Unidata-Dockerfiles/ams2016/unicloud-2.sh
+
+At this point you are almost done. `ssh` into new Docker host:  `docker-machine ssh <azure-host>`.
+
+See the section below about editing the `ldmfile.sh` to correctly handle logging.
+
+Run `~/git/Unidata-Dockerfiles/unicloud-3.sh`
 
 # Preamble<a id="orgheadline2"></a>
 
@@ -110,45 +116,11 @@ The instructions assume we will create an Azure VM called `unidata-server.clouda
 
 The following `docker-machine` command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply `azure-subscription-id` and `azure-subscription-cert` path. See these Azure `docker-machine` [instructions](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/), if you have questions about this process. Also the the size of the VM is currently set to `ExtraLarge`. See [here](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/) to learn more about sizes for virtual machines.
 
-    #!/bin/bash
-    set -x 
-    
-    usage="$(basename "$0") [-h] [-ah, --azure-host] -- script to set up Azure 
-    Docker Host:\n
-        -h  show this help text\n
-        -ah, --azure-host name of Docker host on Azure\n"
-    
-    AZURE_HOST=unidata-server
-    
-    while [[ $# > 0 ]]
-    do
-        key="$1"
-        case $key in
-            -ah|--azure-host)
-                AZURE_HOST="$2"
-                shift # past argument
-                ;;
-            -h|--help)
-                echo $usage
-                exit
-                ;;
-        esac
-        shift # past argument or value
-    done
-    
     # Create Azure VM via docker-machine
     docker-machine -D create -d azure \
-                   --azure-subscription-id="c0a346f1-bba3-4a6d-bd0c-a553ec979e3a" \
-                   --azure-subscription-cert="/Users/chastang/.ssh/mycert.pem" \
-                   --azure-size="ExtraLarge" $AZURE_HOST
-    
-    # Ensure docker commands will be run with new host
-    eval "$(docker-machine env $AZURE_HOST)"
-    
-    # immediately restart VM, according to Azure
-    docker-machine restart $AZURE_HOST
-    # Again, ensure docker commands will be run with new host
-    eval "$(docker-machine env $AZURE_HOST)"
+                   --azure-subscription-id=$AZURE_ID \
+                   --azure-subscription-cert=$AZURE_CERT \
+                   --azure-size=$AZURE_SIZE $AZURE_HOST
 
 ## Configure Unix Shell to Interact with New Azure VM.<a id="orgheadline5"></a>
 
@@ -290,6 +262,8 @@ Also, remember that these files will be used **inside** the LDM container that w
 
 5.  Edit `ldmfile.sh`
 
+    <a id="orgtarget1"></a>
+    
     As the top of this file indicates, you must edit the `logfile` to suit your needs. Change the 
     
         logfile=logs/ldm-mcidas.log

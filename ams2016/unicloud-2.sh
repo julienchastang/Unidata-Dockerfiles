@@ -8,9 +8,6 @@ sudo apt-get -qq install unzip
 # Add ubuntu to docker group
 sudo usermod -G docker ubuntu
 
-# Ensure docker group immediately takes effect on user ubuntu
-su - ubuntu
-
 # Restart docker service
 sudo service docker restart
 
