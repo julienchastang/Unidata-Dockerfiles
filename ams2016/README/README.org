@@ -120,6 +120,8 @@ Mysteriously, when you =ssh= (see next section) into the fresh VM, you are immed
 #+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports none :eval no
   # immediately restart VM, according to Azure
   docker-machine restart <<myvm>>
+  # Again, ensure docker commands will be run with new host
+  eval "$(docker-machine env <<myvm>>)"
 #+END_SRC
 
 ** =ssh= into VM with =docker-machine=
