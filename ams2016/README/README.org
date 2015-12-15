@@ -18,16 +18,20 @@
 
 #+SETUPFILE: theme-readtheorg.setup
 
+#+PROPERTY: header-args :tangle yes
+#+PROPERTY: header-args :tangle "/tmp/unicloud.sh"
+
+
 * Org Export Set up (Internal Only)                                :noexport:
 
 # org-mode stuff. Don't want confirmation for babel exec, nor should babel block be evaluated during export.
 
-#+BEGIN_SRC emacs-lisp :results silent :exports none
+#+BEGIN_SRC emacs-lisp :results silent :exports none :tangle no
   (setq org-confirm-babel-evaluate nil)
   (setq org-export-babel-evaluate nil)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :results silent 
+#+BEGIN_SRC emacs-lisp :results silent :tangle no
   (defun ams2016/org-save-and-export ()
     (interactive)
     (when (eq major-mode 'org-mode)
@@ -42,18 +46,18 @@
 
 # Defining the VM we will be work with for the remainder of this org babel session.
 
-#+BEGIN_SRC org :noweb-ref myvm :exports none
+#+BEGIN_SRC org :noweb-ref myvm :exports none :tangle no
 unidata-server
 #+END_SRC
 
 #+NAME: azure-vm
-#+BEGIN_SRC org :results silent :exports none :noweb yes
+#+BEGIN_SRC org :results silent :exports none :noweb yes :tangle no
 <<myvm>>
 #+END_SRC
 
 # Setting up org babel default arguments for executing =sh= commands below. We will be using tramp for the remote execution. You should have something like this in your ssh-config:
 
-#+BEGIN_SRC sh :eval no :exports none
+#+BEGIN_SRC sh :eval no :exports none :tangle no
 Host <<myvm>>
     User     ubuntu
     Port     22
@@ -63,9 +67,15 @@ Host <<myvm>>
 
 # Defaulting to using remote VM. Be careful to specify :dir ~ for the sh blocks where you do not want remote VM execution of commands.
 
-#+BEGIN_SRC emacs-lisp :noweb yes :results silent :exports none
+#+BEGIN_SRC emacs-lisp :noweb yes :results silent :exports none :tangle no
   (setq-local org-babel-default-header-args:sh
               '((:dir . "/ubuntu@<<myvm>>:")))
+#+END_SRC
+
+# Prepping the tangle
+
+#+BEGIN_SRC sh  :results silent :exports none :shebang "#!/bin/bash" :eval no
+set -x
 #+END_SRC
 
 * Preamble
@@ -101,13 +111,13 @@ docker-machine -D create -d azure \
 
 Execute the following command in your local computer shell environment.
 
-#+BEGIN_SRC sh :dir ~ :results silent :noweb yes
+#+BEGIN_SRC sh :dir ~ :results silent :noweb yes :tangle no
   eval "$(docker-machine env <<myvm>>)"
 #+END_SRC
 
 ** =ssh= into VM with =docker-machine=
 
-#+BEGIN_SRC sh :eval no :noweb yes
+#+BEGIN_SRC sh :eval no :noweb yes :tangle no
   docker-machine ssh <<myvm>>
 #+END_SRC
 
@@ -117,7 +127,7 @@ Execute the following command in your local computer shell environment.
 
 At the very least, we will need =unzip= on the Azure Docker host.
 
-#+BEGIN_SRC sh  :results verbatim drawer :exports code
+#+BEGIN_SRC sh  :results verbatim drawer :exports code :shebang "#!/bin/bash"
   sudo apt-get -qq update
   sudo apt-get -qq install unzip
 #+END_SRC
@@ -139,7 +149,7 @@ docker start/running, process 29917
 
 At this point, we want to restart the VM to get a fresh start. This command may take a little while...
 
-#+BEGIN_SRC sh :dir ~ :noweb yes :results verbatim drawer :exports code
+#+BEGIN_SRC sh :dir ~ :noweb yes :results verbatim drawer :exports code :tangle no
   docker-machine restart <<myvm>>
   eval "$(docker-machine env <<myvm>>)"
 #+END_SRC
@@ -151,19 +161,19 @@ Restarted machines may have new IP addresses. You may need to re-run the `docker
 
 ** =ssh= into VM
 
-#+BEGIN_SRC sh :dir ~ :eval no :noweb yes
+#+BEGIN_SRC sh :dir ~ :eval no :noweb yes :tangle no
   docker-machine ssh <<myvm>>
 #+END_SRC
 
 ** Install =docker-compose= on VM
 
- #+BEGIN_SRC org :noweb-ref dcompose-version :exports none
+ #+BEGIN_SRC org :noweb-ref dcompose-version :exports none :tangle no
  1.5.2
  #+END_SRC
 
 =docker-compose= is a tool for defining and running multi-container Docker applications. In our case, we will be running the LDM, TDS, TDM (THREDDS Data Manager) and RAMADDA so =docker-compose= is perfect for this scenario. Install =docker-compose= on the Azure Docker host.
 
- #+BEGIN_SRC org :noweb yes :results append :exports results
+ #+BEGIN_SRC org :noweb yes :results append :exports results :tangle no
    "You may have to update version (currently at =<<dcompose-version>>=).
  #+END_SRC
 
@@ -267,7 +277,7 @@ Also, remember that these files will be used *inside* the LDM container that we 
 
  This file has been set up for the AMS 2016 demonstration. Otherwise you would have to edit the =registry.xml= to ensure the =hostname= element is correct. For your own cloud VMs, work with =support-idd@unidata.ucar.edu= to devise a correct =hostname= element so that LDM statistics get properly reported. Here is an example =hostname= element =unidata-server.azure.unidata.ucar.edu=.
 
- #+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes
+ #+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes :tangle no
    ;; search for the buffer called registry.xml in your emacs session
    (find-file "/ubuntu@<<myvm>>:/home/ubuntu/etc/registry.xml")
  #+END_SRC
@@ -318,7 +328,7 @@ The =catalog.xml= files for TDS configuration are contained within the =~/tdscon
 
   Let's see what is available in the =~/tdsconfig= directory.
 
-#+BEGIN_SRC sh :results org :exports both
+#+BEGIN_SRC sh :results org :exports both :tangle no
   find ~/tdsconfig -type f -name "*.xml"
 #+END_SRC
 
@@ -353,7 +363,7 @@ you may wish to be careful as there is the potential to lose user data.
 
 Let's first display the free disk space with the =df= command. 
 #+NAME: df-table
-#+BEGIN_SRC sh :results table drawer :exports both
+#+BEGIN_SRC sh :results table drawer :exports both :tangle no
   df -H
 #+END_SRC
 
@@ -425,7 +435,7 @@ When you start RAMADDA for the very first time, you must have  a =password.prope
 
 When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the =tdm= tomcat user. Edit the =docker-compose.yml= file and change the =TDM_PW= to =MeIndexer=. This is not as insecure as it would seem since the =tdm= user has few privileges. Optimally, one could change the password hash for the TDM user in the =tomcat-users.xml= file.
 
-#+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes
+#+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes :tangle no
   ;; search for the buffer called docker-compose.yml in your emacs session
   (find-file "/ubuntu@<<myvm>>:/home/ubuntu/git/Unidata-Dockerfiles/ams2016/docker-compose.yml")
 #+END_SRC
@@ -467,7 +477,7 @@ Next, we will check our work through various means.
 From the shell where you started =docker-machine= earlier you can execute the following =docker ps= command to list the containers on your docker host. It should look something like the output below.
 
 #+NAME: docker-ps
-#+BEGIN_SRC sh :results table drawer  :exports both
+#+BEGIN_SRC sh :results table drawer  :exports both :tangle no
   docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Status}}"
 #+END_SRC
 
@@ -483,7 +493,7 @@ From the shell where you started =docker-machine= earlier you can execute the fo
 
 ** TDS and RAMADDA URLs
 
-#+BEGIN_SRC org :noweb yes :results append :exports results
+#+BEGIN_SRC org :noweb yes :results append :exports results :tangle no
   Verify what you have the TDS and RAMADDA running by navigating to: [[http://<<myvm>>.cloudapp.net/thredds/catalog.html]] and [[http://<<myvm>>.cloudapp.net:8081/repository]]. If you are going to RAMADDA for the first time, you will have to do some [[http://ramadda.org//repository/userguide/toc.html][RAMADDA set up]].
 #+END_SRC
 
@@ -496,7 +506,7 @@ Another way to verify your work is run the [[https://www.unidata.ucar.edu/softwa
 
 *** Access TDS with the IDV
 
-#+BEGIN_SRC org :noweb yes :results append :exports results
+#+BEGIN_SRC org :noweb yes :results append :exports results :tangle no
   In the [[https://www.unidata.ucar.edu/software/idv/docs/userguide/data/choosers/CatalogChooser.html][IDV Dashboard]], you should be able to enter the catalog XML URL: [[http://<<myvm>>.cloudapp.net/thredds/catalog.xml]].  
 #+END_SRC
 
@@ -505,7 +515,7 @@ In the [[https://www.unidata.ucar.edu/software/idv/docs/userguide/data/choosers/
 
 *** Access RAMADDAA with the IDV
 
-#+BEGIN_SRC org :noweb yes :results append :exports results
+#+BEGIN_SRC org :noweb yes :results append :exports results :tangle no
 RAMADDA has good integration with the IDV and the two technolgies work well together. You may wish to install the [[http://www.unidata.ucar.edu/software/idv/docs/workshop/savingstate/Ramadda.html][RAMADDA IDV plugin]] to publish IDV bundles to RAMADDA. RAMADDA also has access to the =/data/ldm= directory so you may want to set up [[http://ramadda.org//repository/userguide/developer/filesystem.html][server-side view of this part of the file system]]. Finally,  you can enter this catlog URL in the IDV dashbaord to examine data holdings shared bundles, etc. on RAMADDA [[http://unidata-server.cloudapp.net:8081/repository?output=thredds.catalog]].
 #+END_SRC
 
