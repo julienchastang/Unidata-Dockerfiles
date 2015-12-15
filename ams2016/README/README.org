@@ -87,7 +87,7 @@ The instructions assume we will create an Azure VM called =unidata-server.clouda
 
 ** Create a VM on Azure.
 
-The following =docker-machine= command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply =azure-subscription-id= and =azure-subscription-cert= path. See these Azure =docker-machine= [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][instructions]], if you have questions about this process.
+The following =docker-machine= command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply =azure-subscription-id= and =azure-subscription-cert= path. See these Azure =docker-machine= [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][instructions]], if you have questions about this process. Also the the size of the VM is currently set to =ExtraLarge=. See [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/][here]] to learn more about sizes for virtual machines.
 
 # Don't execute the following code block in this buffer; it will take too long. Instead =org-babel-tangle= with a prefix argument; C-u C-c C-v t. Then execute from the command line =/tmp/azure.sh=.
 
