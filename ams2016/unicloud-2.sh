@@ -48,11 +48,11 @@ sudo ln -s /mnt /data
 sudo mkdir /mnt/ldm/
 sudo chown -R ubuntu:docker /data/ldm
 sudo mkdir /mnt/repository/
-sudo chown -R ubuntu:docker /data/repository
+sudo chown -R ubuntu:docker /home/ubuntu/repository
 
 # Create Tomcat logging directories
 mkdir -p ~/logs/ramadda-tomcat
 mkdir -p ~/logs/tds-tomcat
 
 # Create RAMADDA default password
-echo ramadda.install.password=changeme! > /data/repository/pw.properties
+echo ramadda.install.password=changeme! > /home/ubuntu/repository/pw.properties
