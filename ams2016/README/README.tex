@@ -1,4 +1,4 @@
-% Created 2015-12-15 Tue 13:28
+% Created 2015-12-15 Tue 18:45
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -17,12 +17,13 @@
 \usepackage{bigfoot}
 \DeclareNewFootnote{URL}[arabic]
 \renewcommand{\href}[2]{#2\footnoteURL{\url{#1}}}
-\author{Julien Chastang}
-\date{\textit{<2015-12-08 Tue>}}
+\setlength{\parindent}{0em}
+\author{Julien Chastang (UCAR, Unidata)}
+\date{\textit{<2015-12-15 Tue>}}
 \title{AMS 2016: UniCloud, Docker at Unidata\\\medskip
 \large LDM, TDS, and RAMADDA on Microsoft Azure VM}
 \hypersetup{
- pdfauthor={Julien Chastang},
+ pdfauthor={Julien Chastang (UCAR, Unidata)},
  pdftitle={AMS 2016: UniCloud, Docker at Unidata},
  pdfkeywords={},
  pdfsubject={},
@@ -35,41 +36,37 @@
 
 
 
-\section{Quick Start}
+\section{Preamble}
 \label{sec:orgheadline1}
+
+The following instructions describe how to configure a \href{https://azure.microsoft.com}{Microsoft Azure VM} serving data with the \href{http://www.unidata.ucar.edu/software/ldm/}{LDM}, \href{http://www.unidata.ucar.edu/software/thredds/current/tds/}{TDS}, and \href{http://sourceforge.net/projects/ramadda/}{RAMADDA}. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You must have \texttt{sudo} priviliges on the Azure host which will hopfully be provided to you be default. You must be comfortable entering commands at the Unix command line. We will be using Docker images defined at the \href{https://github.com/Unidata/Unidata-Dockerfiles}{Unidata-Dockerfiles repository} in addition to a configuration specifically planned for AMS 2016 demonstrations  project \href{https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016}{AMS 2016 demonstrations  project}.
+
+\section{Quick Start}
+\label{sec:orgheadline2}
 
 In order to understand what you are doing, it is best read the complete contents of this document and follow the instructions herein. And if there are problems you will be able to reason about the errors. However, if you are champing at the bit, you can run the following commands to quickly get you going.
 
 \begin{itemize}
 \item \texttt{git clone https://github.com/Unidata/Unidata-Dockerfiles}
 \item \href{https://docs.docker.com/machine/install-machine/}{Download and install} \texttt{docker-machine}
-\item Run the \texttt{Unidata-Dockerfiles/ams2016/unicloud-1.sh [-{}-azure-host] [-{}-azure-host]  [-{}-azure-subscription-id]  [-{}-azure-subscription-cert]  [-{}-azure-size]} script (this will take few minutes)
+\item Run the \texttt{Unidata-Dockerfiles/ams2016/unicloud-1.sh} script (this will take few minutes). See the \hyperref[orgtarget1]{section on Azure} for more information.
 \end{itemize}
 
-At this point you may or may not see an error message pertaining to regenerating the certificates. In this case you will have to:
+For example,
 
 \begin{verbatim}
-docker-machine regenerate-certs <azure-host>
-eval "$(docker-machine env <azure-host>)"
+unicloud-1.sh --azure-host "unidata-server" --azure-subscription-id "3.14" \
+              --azure-subscription-cert "/path/to/mycert.pem"
 \end{verbatim}
 
-Now you are ready to do additional set up on the new Docker host:
+Now you are ready to do additional configuration on the new Docker host:
 
 \begin{verbatim}
 docker-machine ssh <azure-host> "bash -s" < \
     Unidata-Dockerfiles/ams2016/unicloud-2.sh
 \end{verbatim}
 
-At this point you are almost done. \texttt{ssh} into new Docker host:  \texttt{docker-machine ssh <azure-host>}.
-
-See the section below about editing the \texttt{ldmfile.sh} to correctly handle logging.
-
-Run \texttt{\textasciitilde{}/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh}
-
-\section{Preamble}
-\label{sec:orgheadline2}
-
-The following instructions describe how to configure a \href{https://azure.microsoft.com}{Microsoft Azure VM} serving data with the \href{http://www.unidata.ucar.edu/software/ldm/}{LDM}, \href{http://www.unidata.ucar.edu/software/thredds/current/tds/}{TDS}, and \href{http://sourceforge.net/projects/ramadda/}{RAMADDA}. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You must have \texttt{sudo} priviliges on your Azure host which will hopfully be provided to you be default. You will have to be comfortable entering commands at the Unix command line. We will be using Docker images defined at the \href{https://github.com/Unidata/Unidata-Dockerfiles}{Unidata-Dockerfiles repository} in addition to a configuration specifically planned for AMS 2016 demonstrations  project \href{https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016}{AMS 2016 demonstrations  project}.
+You are almost done. \texttt{ssh} into new Docker host with  \texttt{docker-machine ssh <azure-host>}. See the \hyperref[orgtarget2]{section below} about editing the \texttt{ldmfile.sh} to correctly handle logging. Run \texttt{\textasciitilde{}/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh}. See section on \hyperref[orgtarget3]{checking} what you have done.
 \section{Preliminary Setup on Azure}
 \label{sec:orgheadline11}
 
@@ -82,8 +79,11 @@ The instructions assume we will create an Azure VM called \texttt{unidata-server
 
 \subsection{Create a VM on Azure.}
 \label{sec:orgheadline4}
+\label{orgtarget1}
 
-The following \texttt{docker-machine} command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply \texttt{azure-subscription-id} and \texttt{azure-subscription-cert} path. See these Azure \texttt{docker-machine} \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/}{instructions}, if you have questions about this process. Also the the size of the VM is currently set to \texttt{ExtraLarge}. See \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/}{here} to learn more about sizes for virtual machines.
+
+The following \texttt{docker-machine} command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply \texttt{azure-subscription-id} and \texttt{azure-subscription-cert} path. See these Azure \texttt{docker-machine} \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/}{instructions}, if you have questions about this process. Also set the size of the VM which is currently set to \texttt{ExtraSmall} and supply the name of the Azure Docker host. See \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/}{here} to learn more about sizes for virtual machines.
+
 
 \begin{verbatim}
 # Create Azure VM via docker-machine
@@ -93,16 +93,27 @@ docker-machine -D create -d azure \
                --azure-size=$AZURE_SIZE $AZURE_HOST
 \end{verbatim}
 
-
 \subsection{Configure Unix Shell to Interact with New Azure VM.}
 \label{sec:orgheadline5}
 
 Execute the following command \texttt{eval} in your local computer shell environment to ensure that \texttt{docker} commands will be run with the newly created Docker host.
 
+\begin{verbatim}
+# Ensure docker commands will be run with new host
+eval "$(docker-machine env $AZURE_HOST)"
+\end{verbatim}
+
 \subsection{Restart Azure VM}
 \label{sec:orgheadline6}
 
 Mysteriously, when you \texttt{ssh} (see next section) into the fresh VM, you are immediately told to restart it so let's preempt that message by doing that now.
+
+\begin{verbatim}
+# immediately restart VM, according to Azure
+docker-machine restart $AZURE_HOST
+# Again, ensure docker commands will be run with new host
+eval "$(docker-machine env $AZURE_HOST)"
+\end{verbatim}
 
 \subsection{\texttt{ssh} into VM with \texttt{docker-machine}}
 \label{sec:orgheadline7}
@@ -283,7 +294,7 @@ cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
 
 \item Edit \texttt{ldmfile.sh}
 \label{sec:orgheadline21}
-
+\label{orgtarget2}
 Open the \texttt{etc/TDS/util/ldmfile.sh} file the editor of your choice. As the top of this file indicates, you must edit the \texttt{logfile} to suit your needs. Change the 
 
 \begin{verbatim}
@@ -462,7 +473,7 @@ docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 
 \section{Check What is Running}
 \label{sec:orgheadline43}
-
+\label{orgtarget3}
 At this point, you should have these services running:
 
 \begin{itemize}
@@ -513,4 +524,17 @@ In the \href{https://www.unidata.ucar.edu/software/idv/docs/userguide/data/choos
 \label{sec:orgheadline41}
 
 RAMADDA has good integration with the IDV and the two technologies work well together. You may wish to install the \href{http://www.unidata.ucar.edu/software/idv/docs/workshop/savingstate/Ramadda.html}{RAMADDA IDV plugin} to publish IDV bundles to RAMADDA. RAMADDA also has access to the \texttt{/data/ldm} directory so you may want to set up \href{http://ramadda.org//repository/userguide/developer/filesystem.html}{server-side view of this part of the file system}. Finally,  you can enter this catalog URL in the IDV dashboard to examine data holdings shared bundles, etc. on RAMADDA \url{http://unidata-server.cloudapp.net:8081/repository?output=thredds.catalog}.
+
+
+\section{Common Problems}
+\label{sec:orgheadline45}
+\subsection{Certificate Regeneration}
+\label{sec:orgheadline44}
+
+When using \texttt{docker-machine}  may see an error message pertaining to regenerating certificates. In this case:
+
+\begin{verbatim}
+docker-machine regenerate-certs <azure-host>
+eval "$(docker-machine env <azure-host>)"
+\end{verbatim}
 \end{document}

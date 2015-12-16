@@ -3,18 +3,18 @@
                  AMS 2016: UNICLOUD, DOCKER AT UNIDATA
               LDM, TDS, and RAMADDA on Microsoft Azure VM
 
-                            Julien Chastang
+                    Julien Chastang (UCAR, Unidata)
              _____________________________________________
 
 
-                            <2015-12-08 Tue>
+                            <2015-12-15 Tue>
 
 
 Table of Contents
 _________________
 
-1 Quick Start
-2 Preamble
+1 Preamble
+2 Quick Start
 3 Preliminary Setup on Azure
 .. 3.1 `docker-machine'
 .. 3.2 Create a VM on Azure.
@@ -51,55 +51,14 @@ _________________
 .. 9.3 Viewing Data with the IDV
 ..... 9.3.1 Access TDS with the IDV
 ..... 9.3.2 Access RAMADDAA with the IDV
+10 Common Problems
+.. 10.1 Certificate Regeneration
 
 
 
 
 
-1 Quick Start
-=============
-
-  In order to understand what you are doing, it is best read the
-  complete contents of this document and follow the instructions
-  herein. And if there are problems you will be able to reason about the
-  errors. However, if you are champing at the bit, you can run the
-  following commands to quickly get you going.
-
-  - `git clone https://github.com/Unidata/Unidata-Dockerfiles'
-  - [Download and install] `docker-machine'
-  - Run the `Unidata-Dockerfiles/ams2016/unicloud-1.sh [--azure-host]
-    [--azure-host] [--azure-subscription-id] [--azure-subscription-cert]
-    [--azure-size]' script (this will take few minutes)
-
-  At this point you may or may not see an error message pertaining to
-  regenerating the certificates. In this case you will have to:
-
-  ,----
-  | docker-machine regenerate-certs <azure-host>
-  | eval "$(docker-machine env <azure-host>)"
-  `----
-
-  Now you are ready to do additional set up on the new Docker host:
-
-  ,----
-  | docker-machine ssh <azure-host> "bash -s" < \
-  |     Unidata-Dockerfiles/ams2016/unicloud-2.sh
-  `----
-
-  At this point you are almost done. `ssh' into new Docker host:
-  `docker-machine ssh <azure-host>'.
-
-  See the section below about editing the `ldmfile.sh' to correctly
-  handle logging.
-
-  Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh'
-
-
-  [Download and install]
-  https://docs.docker.com/machine/install-machine/
-
-
-2 Preamble
+1 Preamble
 ==========
 
   The following instructions describe how to configure a [Microsoft
@@ -107,11 +66,11 @@ _________________
   document assumes you have access to Azure resources though these
   instructions should be fairly similar on other cloud providers (e.g.,
   Amazon). They also assume familiarity with Unix, Docker, and Unidata
-  technology in general. You must have `sudo' priviliges on your Azure
-  host which will hopfully be provided to you be default. You will have
-  to be comfortable entering commands at the Unix command line. We will
-  be using Docker images defined at the [Unidata-Dockerfiles repository]
-  in addition to a configuration specifically planned for AMS 2016
+  technology in general. You must have `sudo' priviliges on the Azure
+  host which will hopfully be provided to you be default. You must be
+  comfortable entering commands at the Unix command line. We will be
+  using Docker images defined at the [Unidata-Dockerfiles repository] in
+  addition to a configuration specifically planned for AMS 2016
   demonstrations project [AMS 2016 demonstrations project].
 
 
@@ -128,6 +87,47 @@ _________________
 
   [AMS 2016 demonstrations project]
   https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016
+
+
+2 Quick Start
+=============
+
+  In order to understand what you are doing, it is best read the
+  complete contents of this document and follow the instructions
+  herein. And if there are problems you will be able to reason about the
+  errors. However, if you are champing at the bit, you can run the
+  following commands to quickly get you going.
+
+  - `git clone https://github.com/Unidata/Unidata-Dockerfiles'
+  - [Download and install] `docker-machine'
+  - Run the `Unidata-Dockerfiles/ams2016/unicloud-1.sh' script (this
+    will take few minutes). See the section on Azure for more
+    information.
+
+  For example,
+
+  ,----
+  | unicloud-1.sh --azure-host "unidata-server" --azure-subscription-id "3.14" \
+  |               --azure-subscription-cert "/path/to/mycert.pem"
+  `----
+
+  Now you are ready to do additional configuration on the new Docker
+  host:
+
+  ,----
+  | docker-machine ssh <azure-host> "bash -s" < \
+  |     Unidata-Dockerfiles/ams2016/unicloud-2.sh
+  `----
+
+  You are almost done. `ssh' into new Docker host with `docker-machine
+  ssh <azure-host>'. See the section below about editing the
+  `ldmfile.sh' to correctly handle logging. Run
+  `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh'. See section on
+  checking what you have done.
+
+
+  [Download and install]
+  https://docs.docker.com/machine/install-machine/
 
 
 3 Preliminary Setup on Azure
@@ -154,14 +154,18 @@ _________________
 3.2 Create a VM on Azure.
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+
+
   The following `docker-machine' command will create a Docker VM on
   Azure in which you will run various Docker containers. It will take a
   few minutes to run (between 5 and 10 minutes). You will have to supply
   `azure-subscription-id' and `azure-subscription-cert' path. See these
   Azure `docker-machine' [instructions], if you have questions about
-  this process. Also the the size of the VM is currently set to
-  `ExtraLarge'. See [here] to learn more about sizes for virtual
-  machines.
+  this process. Also set the size of the VM which is currently set to
+  `ExtraSmall' and supply the name of the Azure Docker host. See [here]
+  to learn more about sizes for virtual machines.
+
 
   ,----
   | # Create Azure VM via docker-machine
@@ -186,6 +190,11 @@ _________________
   environment to ensure that `docker' commands will be run with the
   newly created Docker host.
 
+  ,----
+  | # Ensure docker commands will be run with new host
+  | eval "$(docker-machine env $AZURE_HOST)"
+  `----
+
 
 3.4 Restart Azure VM
 ~~~~~~~~~~~~~~~~~~~~
@@ -193,6 +202,13 @@ _________________
   Mysteriously, when you `ssh' (see next section) into the fresh VM, you
   are immediately told to restart it so let's preempt that message by
   doing that now.
+
+  ,----
+  | # immediately restart VM, according to Azure
+  | docker-machine restart $AZURE_HOST
+  | # Again, ensure docker commands will be run with new host
+  | eval "$(docker-machine env $AZURE_HOST)"
+  `----
 
 
 3.5 `ssh' into VM with `docker-machine'
@@ -446,6 +462,7 @@ _________________
 
 * 4.3.2.5 Edit `ldmfile.sh'
 
+
   Open the `etc/TDS/util/ldmfile.sh' file the editor of your choice. As
   the top of this file indicates, you must edit the `logfile' to suit
   your needs. Change the
@@ -676,6 +693,7 @@ _________________
 9 Check What is Running
 =======================
 
+
   At this point, you should have these services running:
 
   - LDM
@@ -757,3 +775,18 @@ _________________
 
   [server-side view of this part of the file system]
   http://ramadda.org//repository/userguide/developer/filesystem.html
+
+
+10 Common Problems
+==================
+
+10.1 Certificate Regeneration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  When using `docker-machine' may see an error message pertaining to
+  regenerating certificates. In this case:
+
+  ,----
+  | docker-machine regenerate-certs <azure-host>
+  | eval "$(docker-machine env <azure-host>)"
+  `----

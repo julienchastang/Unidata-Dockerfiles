@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2015-12-15 Tue 13:28 -->
+<!-- 2015-12-15 Tue 18:45 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>AMS 2016: UniCloud, Docker at Unidata</title>
 <meta  name="generator" content="Org-mode" />
-<meta  name="author" content="Julien Chastang" />
+<meta  name="author" content="Julien Chastang (UCAR, Unidata)" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center;
@@ -157,8 +157,8 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">1. Quick Start</a></li>
-<li><a href="#orgheadline2">2. Preamble</a></li>
+<li><a href="#orgheadline1">1. Preamble</a></li>
+<li><a href="#orgheadline2">2. Quick Start</a></li>
 <li><a href="#orgheadline11">3. Preliminary Setup on Azure</a>
 <ul>
 <li><a href="#orgheadline3">3.1. <code>docker-machine</code></a></li>
@@ -226,14 +226,28 @@ for the JavaScript code in this tag.
 </li>
 </ul>
 </li>
+<li><a href="#orgheadline45">10. Common Problems</a>
+<ul>
+<li><a href="#orgheadline44">10.1. Certificate Regeneration</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
 
 
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="section-number-2">1</span> Quick Start</h2>
+<h2 id="orgheadline1"><span class="section-number-2">1</span> Preamble</h2>
 <div class="outline-text-2" id="text-1">
+<p>
+The following instructions describe how to configure a <a href="https://azure.microsoft.com/">Microsoft Azure VM</a> serving data with the <a href="http://www.unidata.ucar.edu/software/ldm/">LDM</a>, <a href="http://www.unidata.ucar.edu/software/thredds/current/tds/">TDS</a>, and <a href="http://sourceforge.net/projects/ramadda/">RAMADDA</a>. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You must have <code>sudo</code> priviliges on the Azure host which will hopfully be provided to you be default. You must be comfortable entering commands at the Unix command line. We will be using Docker images defined at the <a href="https://github.com/Unidata/Unidata-Dockerfiles">Unidata-Dockerfiles repository</a> in addition to a configuration specifically planned for AMS 2016 demonstrations  project <a href="https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016">AMS 2016 demonstrations  project</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> Quick Start</h2>
+<div class="outline-text-2" id="text-2">
 <p>
 In order to understand what you are doing, it is best read the complete contents of this document and follow the instructions herein. And if there are problems you will be able to reason about the errors. However, if you are champing at the bit, you can run the following commands to quickly get you going.
 </p>
@@ -241,50 +255,33 @@ In order to understand what you are doing, it is best read the complete contents
 <ul class="org-ul">
 <li><code>git clone https://github.com/Unidata/Unidata-Dockerfiles</code></li>
 <li><a href="https://docs.docker.com/machine/install-machine/">Download and install</a> <code>docker-machine</code></li>
-<li>Run the <code>Unidata-Dockerfiles/ams2016/unicloud-1.sh [--azure-host] [--azure-host]  [--azure-subscription-id]  [--azure-subscription-cert]  [--azure-size]</code> script (this will take few minutes)</li>
+<li>Run the <code>Unidata-Dockerfiles/ams2016/unicloud-1.sh</code> script (this will take few minutes). See the <a href="#orgtarget1">section on Azure</a> for more information.</li>
 </ul>
 
 <p>
-At this point you may or may not see an error message pertaining to regenerating the certificates. In this case you will have to:
+For example,
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-sh">docker-machine regenerate-certs &lt;azure-host&gt;
-<span style="color: #0000ff; font-weight: bold;">eval</span> <span style="color: #00ff00;">"$(docker-machine env &lt;azure-host&gt;)"</span>
+<pre class="src src-sh">unicloud-1.sh --azure-host <span style="color: #008000;">"unidata-server"</span> --azure-subscription-id <span style="color: #008000;">"3.14"</span> <span style="color: #008000;">\</span>
+              --azure-subscription-cert <span style="color: #008000;">"/path/to/mycert.pem"</span>
 </pre>
 </div>
 
 <p>
-Now you are ready to do additional set up on the new Docker host:
+Now you are ready to do additional configuration on the new Docker host:
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-sh">docker-machine ssh &lt;azure-host&gt; <span style="color: #00ff00;">"bash -s"</span> &lt; <span style="color: #00ff00;">\</span>
+<pre class="src src-sh">docker-machine ssh &lt;azure-host&gt; <span style="color: #008000;">"bash -s"</span> &lt; <span style="color: #008000;">\</span>
     Unidata-Dockerfiles/ams2016/unicloud-2.sh
 </pre>
 </div>
 
 <p>
-At this point you are almost done. <code>ssh</code> into new Docker host:  <code>docker-machine ssh &lt;azure-host&gt;</code>.
-</p>
-
-<p>
-See the section below about editing the <code>ldmfile.sh</code> to correctly handle logging.
-</p>
-
-<p>
-Run <code>~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh</code>
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2"><span class="section-number-2">2</span> Preamble</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-The following instructions describe how to configure a <a href="https://azure.microsoft.com/">Microsoft Azure VM</a> serving data with the <a href="http://www.unidata.ucar.edu/software/ldm/">LDM</a>, <a href="http://www.unidata.ucar.edu/software/thredds/current/tds/">TDS</a>, and <a href="http://sourceforge.net/projects/ramadda/">RAMADDA</a>. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You must have <code>sudo</code> priviliges on your Azure host which will hopfully be provided to you be default. You will have to be comfortable entering commands at the Unix command line. We will be using Docker images defined at the <a href="https://github.com/Unidata/Unidata-Dockerfiles">Unidata-Dockerfiles repository</a> in addition to a configuration specifically planned for AMS 2016 demonstrations  project <a href="https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016">AMS 2016 demonstrations  project</a>.
+You are almost done. <code>ssh</code> into new Docker host with  <code>docker-machine ssh &lt;azure-host&gt;</code>. See the <a href="#orgtarget2">section below</a> about editing the <code>ldmfile.sh</code> to correctly handle logging. Run <code>~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh</code>. See section on <a href="#orgtarget3">checking</a> what you have done.
 </p>
 </div>
 </div>
@@ -309,12 +306,18 @@ The instructions assume we will create an Azure VM called <code>unidata-server.c
 <h3 id="orgheadline4"><span class="section-number-3">3.2</span> Create a VM on Azure.</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
-The following <code>docker-machine</code> command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply <code>azure-subscription-id</code> and <code>azure-subscription-cert</code> path. See these Azure <code>docker-machine</code> <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/">instructions</a>, if you have questions about this process. Also the the size of the VM is currently set to <code>ExtraLarge</code>. See <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/">here</a> to learn more about sizes for virtual machines.
+<a id="orgtarget1"></a>
 </p>
+
+
+<p>
+The following <code>docker-machine</code> command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply <code>azure-subscription-id</code> and <code>azure-subscription-cert</code> path. See these Azure <code>docker-machine</code> <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/">instructions</a>, if you have questions about this process. Also set the size of the VM which is currently set to <code>ExtraSmall</code> and supply the name of the Azure Docker host. See <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/">here</a> to learn more about sizes for virtual machines.
+</p>
+
 
 <div class="org-src-container">
 
-<pre class="src src-org"><span style="color: #ff0000;"># Create Azure VM via docker-machine</span>
+<pre class="src src-org"><span style="color: #8D8D84; font-style: italic;"># Create Azure VM via docker-machine</span>
 docker-machine -D create -d azure \
                --azure-subscription-id=$AZURE_ID \
                --azure-subscription-cert=$AZURE_CERT \
@@ -324,13 +327,19 @@ docker-machine -D create -d azure \
 </div>
 </div>
 
-
 <div id="outline-container-orgheadline5" class="outline-3">
 <h3 id="orgheadline5"><span class="section-number-3">3.3</span> Configure Unix Shell to Interact with New Azure VM.</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 Execute the following command <code>eval</code> in your local computer shell environment to ensure that <code>docker</code> commands will be run with the newly created Docker host.
 </p>
+
+<div class="org-src-container">
+
+<pre class="src src-org"><span style="color: #8D8D84; font-style: italic;"># Ensure docker commands will be run with new host</span>
+eval "$(docker-machine env $AZURE_HOST)"
+</pre>
+</div>
 </div>
 </div>
 
@@ -340,6 +349,15 @@ Execute the following command <code>eval</code> in your local computer shell env
 <p>
 Mysteriously, when you <code>ssh</code> (see next section) into the fresh VM, you are immediately told to restart it so let's preempt that message by doing that now.
 </p>
+
+<div class="org-src-container">
+
+<pre class="src src-org"><span style="color: #8D8D84; font-style: italic;"># immediately restart VM, according to Azure</span>
+docker-machine restart $AZURE_HOST
+<span style="color: #8D8D84; font-style: italic;"># Again, ensure docker commands will be run with new host</span>
+eval "$(docker-machine env $AZURE_HOST)"
+</pre>
+</div>
 </div>
 </div>
 
@@ -364,9 +382,9 @@ At the very least, we will need <code>unzip</code> on the Azure Docker host.
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #0000ff; font-weight: bold;">set</span> -x 
+<pre class="src src-sh"><span style="color: #006FE0;">set</span> -x 
 
-<span style="color: #ff0000;"># </span><span style="color: #ff0000;">update and install package(s)</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">update and install package(s)</span>
 sudo apt-get -qq update
 sudo apt-get -qq install unzip
 </pre>
@@ -379,10 +397,10 @@ sudo apt-get -qq install unzip
 <div class="outline-text-3" id="text-3-7">
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Add ubuntu to docker group</span>
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Add ubuntu to docker group</span>
 sudo usermod -G docker ubuntu
 
-<span style="color: #ff0000;"># </span><span style="color: #ff0000;">Restart docker service</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Restart docker service</span>
 sudo service docker restart
 </pre>
 </div>
@@ -402,9 +420,9 @@ sudo service docker restart
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Get docker-compose</span>
-curl -L <span style="color: #00ff00;">\</span>
-https://github.com/docker/compose/releases/download/1.5.2/docker-compose-<span style="color: #ff00ff;">`uname -s`</span>-<span style="color: #ff00ff;">`uname -m`</span> <span style="color: #00ff00;">\</span>
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Get docker-compose</span>
+curl -L <span style="color: #008000;">\</span>
+https://github.com/docker/compose/releases/download/1.5.2/docker-compose-<span style="color: #FF1493;">`uname -s`</span>-<span style="color: #FF1493;">`uname -m`</span> <span style="color: #008000;">\</span>
       &gt; docker-compose
 sudo mv docker-compose /usr/local/bin/
 sudo chmod +x /usr/local/bin/docker-compose
@@ -458,9 +476,9 @@ With that background information out of the way, let's clone those repositories 
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Get the git repositories we will want to work with</span>
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Get the git repositories we will want to work with</span>
 mkdir -p /home/ubuntu/git
-git clone https://github.com/Unidata/Unidata-Dockerfiles <span style="color: #00ff00;">\</span>
+git clone https://github.com/Unidata/Unidata-Dockerfiles <span style="color: #008000;">\</span>
     /home/ubuntu/git/Unidata-Dockerfiles
 git clone https://github.com/Unidata/TdsConfig /home/ubuntu/git/TdsConfig
 </pre>
@@ -493,7 +511,7 @@ The LDM <code>etc</code> directory is where you will find configuration files re
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Create LDM directories</span>
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Create LDM directories</span>
 mkdir -p ~/var/logs 
 mkdir -p ~/etc/TDS
 </pre>
@@ -514,7 +532,7 @@ There is a generic set of LDM configuration files located here <code>~/git/Unida
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Copy various files for the LDM.</span>
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Copy various files for the LDM.</span>
 cp ~/git/Unidata-Dockerfiles/ldm/etc/netcheck.conf ~/etc
 </pre>
 </div>
@@ -586,7 +604,7 @@ In the <code>ldmd.conf</code> file we copied just a moment ago there is a refere
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Set up LDM and TDS configuration</span>
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Set up LDM and TDS configuration</span>
 mkdir -p ~/tdsconfig/
 cp ~/git/TdsConfig/idd/config.zip ~/tdsconfig/
 unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
@@ -597,6 +615,7 @@ cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
 
 <li><a id="orgheadline21"></a>Edit <code>ldmfile.sh</code><br  /><div class="outline-text-5" id="text-4-3-2-5">
 <p>
+<a id="orgtarget2"></a>
 Open the <code>etc/TDS/util/ldmfile.sh</code> file the editor of your choice. As the top of this file indicates, you must edit the <code>logfile</code> to suit your needs. Change the 
 </p>
 
@@ -644,7 +663,7 @@ Let's see what is available in the <code>~/tdsconfig</code> directory.
 
 <div class="org-src-container">
 
-<pre class="src src-sh">find ~/tdsconfig -type f -name <span style="color: #00ff00;">"*.xml"</span>
+<pre class="src src-sh">find ~/tdsconfig -type f -name <span style="color: #008000;">"*.xml"</span>
 </pre>
 </div>
 
@@ -828,7 +847,7 @@ Create a <code>/data</code> directory where the LDM can write data soft link to 
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Set up data directories</span>
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Set up data directories</span>
 sudo ln -s /mnt /data
 sudo mkdir /mnt/ldm/
 sudo chown -R ubuntu:docker /data/ldm
@@ -908,7 +927,7 @@ It is a good idea to mount Tomcat logging directories outside the container so t
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Create Tomcat logging directories</span>
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Create Tomcat logging directories</span>
 mkdir -p ~/logs/ramadda-tomcat
 mkdir -p ~/logs/tds-tomcat
 </pre>
@@ -932,8 +951,8 @@ When you start RAMADDA for the very first time, you must have  a <code>password.
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Create RAMADDA default password</span>
-<span style="color: #0000ff; font-weight: bold;">echo</span> ramadda.install.password=changeme! &gt; /data/repository/pw.properties
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Create RAMADDA default password</span>
+<span style="color: #006FE0;">echo</span> ramadda.install.password=changeme! &gt; /data/repository/pw.properties
 </pre>
 </div>
 </div>
@@ -958,9 +977,9 @@ At this point you are almost ready to run the whole kit and caboodle. But first 
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #0000ff; font-weight: bold;">set</span> -x
+<pre class="src src-sh"><span style="color: #006FE0;">set</span> -x
 
-<span style="color: #ff0000;"># </span><span style="color: #ff0000;">Docker pull all relavant images</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Docker pull all relavant images</span>
 docker pull unidata/ldmtds:latest
 docker pull unidata/tdm:latest
 docker pull unidata/tds:latest
@@ -979,7 +998,7 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">Start up all images</span>
+<pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Start up all images</span>
 docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 </pre>
 </div>
@@ -991,6 +1010,7 @@ docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 <h2 id="orgheadline43"><span class="section-number-2">9</span> Check What is Running</h2>
 <div class="outline-text-2" id="text-9">
 <p>
+<a id="orgtarget3"></a>
 At this point, you should have these services running:
 </p>
 
@@ -1015,7 +1035,7 @@ From the shell where you started <code>docker-machine</code> earlier you can exe
 
 <div class="org-src-container">
 
-<pre class="src src-sh" id="orgsrcblock2">docker ps --format <span style="color: #00ff00;">"table {{.ID}}\t{{.Image}}\t{{.Status}}"</span>
+<pre class="src src-sh" id="orgsrcblock2">docker ps --format <span style="color: #008000;">"table {{.ID}}\t{{.Image}}\t{{.Status}}"</span>
 </pre>
 </div>
 
@@ -1115,11 +1135,32 @@ RAMADDA has good integration with the IDV and the two technologies work well tog
 </div>
 </div>
 </div>
+
+
+<div id="outline-container-orgheadline45" class="outline-2">
+<h2 id="orgheadline45"><span class="section-number-2">10</span> Common Problems</h2>
+<div class="outline-text-2" id="text-10">
+</div><div id="outline-container-orgheadline44" class="outline-3">
+<h3 id="orgheadline44"><span class="section-number-3">10.1</span> Certificate Regeneration</h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+When using <code>docker-machine</code>  may see an error message pertaining to regenerating certificates. In this case:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh">docker-machine regenerate-certs &lt;azure-host&gt;
+<span style="color: #006FE0;">eval</span> <span style="color: #008000;">"$(docker-machine env &lt;azure-host&gt;)"</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-12-08 Tue&gt;</span></span></p>
-<p class="author">Author: Julien Chastang</p>
-<p class="date">Created: 2015-12-15 Tue 13:28</p>
+<p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-12-15 Tue&gt;</span></span></p>
+<p class="author">Author: Julien Chastang (UCAR, Unidata)</p>
+<p class="date">Created: 2015-12-15 Tue 18:45</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

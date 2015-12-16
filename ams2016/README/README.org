@@ -4,8 +4,8 @@
 #+OPTIONS: title:t toc:t todo:t |:t
 #+TITLE: AMS 2016: UniCloud, Docker at Unidata
 #+SUBTITLE: LDM, TDS, and RAMADDA on Microsoft Azure VM
-#+DATE: <2015-12-08 Tue>
-#+AUTHOR: Julien Chastang
+#+DATE: <2015-12-15 Tue>
+#+AUTHOR: Julien Chastang (UCAR, Unidata)
 #+EMAIL: chastang@ucar.edu
 #+LANGUAGE: en
 #+SELECT_TAGS: export
@@ -15,6 +15,7 @@
 #+LATEX_HEADER: \usepackage{bigfoot}
 #+LATEX_HEADER: \DeclareNewFootnote{URL}[arabic]
 #+LATEX_HEADER: \renewcommand{\href}[2]{#2\footnoteURL{\url{#1}}}
+#+LATEX_HEADER: \setlength{\parindent}{0em}
 
 #+SETUPFILE: theme-readtheorg.setup
 
@@ -30,6 +31,8 @@
   (setq org-export-babel-evaluate nil)
 #+END_SRC
 
+# post saving hooks to export in various formats
+
 #+BEGIN_SRC emacs-lisp :results silent 
   (defun ams2016/org-save-and-export ()
     (interactive)
@@ -43,11 +46,13 @@
   (add-hook 'after-save-hook 'ams2016/org-save-and-export nil t)
 #+END_SRC
 
-# Defining the VM we will be work with for the remainder of this org babel session.
+# Defining the VM we will be working with for the remainder of this org babel session.
 
 #+BEGIN_SRC org :noweb-ref myvm :exports none 
 unidata-server
 #+END_SRC
+
+# Setting up noweb
 
 #+NAME: azure-vm
 #+BEGIN_SRC org :results silent :exports none :noweb yes 
@@ -68,8 +73,12 @@ Host <<myvm>>
 
 #+BEGIN_SRC emacs-lisp :noweb yes :results silent :exports none 
   (setq-local org-babel-default-header-args:sh
-              '((:dir . "/ubuntu@<<myvm>>:")))a
+              '((:dir . "/ubuntu@<<myvm>>:")))
 #+END_SRC
+
+* Preamble
+
+The following instructions describe how to configure a [[https://azure.microsoft.com][Microsoft Azure VM]] serving data with the [[http://www.unidata.ucar.edu/software/ldm/][LDM]], [[http://www.unidata.ucar.edu/software/thredds/current/tds/][TDS]], and [[http://sourceforge.net/projects/ramadda/][RAMADDA]]. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You must have =sudo= priviliges on the Azure host which will hopfully be provided to you be default. You must be comfortable entering commands at the Unix command line. We will be using Docker images defined at the [[https://github.com/Unidata/Unidata-Dockerfiles][Unidata-Dockerfiles repository]] in addition to a configuration specifically planned for AMS 2016 demonstrations  project [[https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016][AMS 2016 demonstrations  project]].
 
 * Quick Start
 
@@ -77,35 +86,23 @@ In order to understand what you are doing, it is best read the complete contents
 
    - =git clone https://github.com/Unidata/Unidata-Dockerfiles=
    - [[https://docs.docker.com/machine/install-machine/][Download and install]] =docker-machine=
-   - Run the =Unidata-Dockerfiles/ams2016/unicloud-1.sh [--azure-host] [--azure-host]  [--azure-subscription-id]  [--azure-subscription-cert]  [--azure-size]= script (this will take few minutes)
+   - Run the =Unidata-Dockerfiles/ams2016/unicloud-1.sh= script (this will take few minutes). See the [[prelim:azure][section on Azure]] for more information.
 
-At this point you may or may not see an error message pertaining to regenerating the certificates. In this case you will have to:
+For example,
 
-#+BEGIN_SRC sh :eval no :results none
-   docker-machine regenerate-certs <azure-host>
-   eval "$(docker-machine env <azure-host>)"
+#+BEGIN_SRC sh :eval no :exports code
+  unicloud-1.sh --azure-host "unidata-server" --azure-subscription-id "3.14" \
+                --azure-subscription-cert "/path/to/mycert.pem"
 #+END_SRC
 
-Now you are ready to do additional set up on the new Docker host:
+Now you are ready to do additional configuration on the new Docker host:
 
 #+BEGIN_SRC sh :eval no :results none
   docker-machine ssh <azure-host> "bash -s" < \
       Unidata-Dockerfiles/ams2016/unicloud-2.sh
 #+END_SRC
 
-At this point you are almost done. =ssh= into new Docker host:  =docker-machine ssh <azure-host>=.
-
-See the section below about editing the =ldmfile.sh= to correctly handle logging.
-
-# Get docker images going with this script
-Run =~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh=
-
-* Preamble
-
-The following instructions describe how to configure a [[https://azure.microsoft.com][Microsoft Azure VM]] serving data with the [[http://www.unidata.ucar.edu/software/ldm/][LDM]], [[http://www.unidata.ucar.edu/software/thredds/current/tds/][TDS]], and [[http://sourceforge.net/projects/ramadda/][RAMADDA]]. This document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also assume familiarity with Unix, Docker, and Unidata technology in general. You must have =sudo= priviliges on your Azure host which will hopfully be provided to you be default. You will have to be comfortable entering commands at the Unix command line. We will be using Docker images defined at the [[https://github.com/Unidata/Unidata-Dockerfiles][Unidata-Dockerfiles repository]] in addition to a configuration specifically planned for AMS 2016 demonstrations  project [[https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016][AMS 2016 demonstrations  project]].
-
-:PROPERTIES:
-:END:
+You are almost done. =ssh= into new Docker host with  =docker-machine ssh <azure-host>=. See the [[config:ldmfile][section below]] about editing the =ldmfile.sh= to correctly handle logging. Run =~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh=. See section on [[check][checking]] what you have done.
 * Preliminary Setup on Azure
 
 The instructions assume we will create an Azure VM called =unidata-server.cloudapp.net= abbreviated to =unidata-server=. Tailor the VM name for your purposes when following this document. This VM will be our *Docker Host* from where we will run Docker containers for the LDM, TDS, and RAMADDA.
@@ -115,8 +112,9 @@ The instructions assume we will create an Azure VM called =unidata-server.clouda
 [[https://docs.docker.com/machine/install-machine/][Install]] =docker-machine= on your local computer. =docker-machine= is a command line tool that gives users the ability to create Docker VMs on your local computer or on a cloud provider such as Azure.
 
 ** Create a VM on Azure.
+<<prelim:azure>>
 
-The following =docker-machine= command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply =azure-subscription-id= and =azure-subscription-cert= path. See these Azure =docker-machine= [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][instructions]], if you have questions about this process. Also the the size of the VM is currently set to =ExtraLarge=. See [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/][here]] to learn more about sizes for virtual machines.
+# Setup unicloud-1.sh
 
 #+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh :shebang "#!/bin/bash" :exports none
   set -x 
@@ -162,7 +160,9 @@ The following =docker-machine= command will create a Docker VM on Azure in which
   done
 #+END_SRC
 
-# Don't execute the following code block in this buffer; it will take too long. Instead =org-babel-tangle= with a prefix argument; C-u C-c C-v t. Then execute from the command line =/tmp/azure.sh=.
+The following =docker-machine= command will create a Docker VM on Azure in which you will run various Docker containers. It will take a few minutes to run (between 5 and 10 minutes). You will have to supply =azure-subscription-id= and =azure-subscription-cert= path. See these Azure =docker-machine= [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][instructions]], if you have questions about this process. Also set the size of the VM which is currently set to =ExtraSmall= and supply the name of the Azure Docker host. See [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/][here]] to learn more about sizes for virtual machines.
+
+# For Babel users, simply run the unicloud-1.sh command from the CL eval the next 3 code blocks. You don't want to execute in buffer, it takes too long.
 
 #+BEGIN_SRC org :noweb yes :dir ~  :eval no :tangle ../unicloud-1.sh :exports code
 
@@ -171,15 +171,13 @@ docker-machine -D create -d azure \
                --azure-subscription-id=$AZURE_ID \
                --azure-subscription-cert=$AZURE_CERT \
                --azure-size=$AZURE_SIZE $AZURE_HOST
-
 #+END_SRC
-
 
 ** Configure Unix Shell to Interact with New Azure VM.
 
 Execute the following command =eval= in your local computer shell environment to ensure that =docker= commands will be run with the newly created Docker host.
 
-#+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports none :eval no
+#+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports code :eval no
   # Ensure docker commands will be run with new host
   eval "$(docker-machine env $AZURE_HOST)"
 #+END_SRC
@@ -188,11 +186,19 @@ Execute the following command =eval= in your local computer shell environment to
 
 Mysteriously, when you =ssh= (see next section) into the fresh VM, you are immediately told to restart it so let's preempt that message by doing that now.
 
-#+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports none :eval no
+#+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports code :eval no
   # immediately restart VM, according to Azure
   docker-machine restart $AZURE_HOST
   # Again, ensure docker commands will be run with new host
   eval "$(docker-machine env $AZURE_HOST)"
+#+END_SRC
+
+# If babling, will want to evaluate the next code block
+#+BEGIN_SRC org :noweb yes :dir ~  :exports none
+  # immediately restart VM, according to Azure
+  docker-machine restart <<myvm>>
+  # Again, ensure docker commands will be run with new host
+  eval "$(docker-machine env <<myvm>>)"
 #+END_SRC
 
 ** =ssh= into VM with =docker-machine=
@@ -374,7 +380,7 @@ In the =ldmd.conf= file we copied just a moment ago there is a reference to a =p
 #+END_SRC
 
 **** Edit =ldmfile.sh=
-
+<<config:ldmfile>>
 Open the =etc/TDS/util/ldmfile.sh= file the editor of your choice. As the top of this file indicates, you must edit the =logfile= to suit your needs. Change the 
 
 #+BEGIN_EXAMPLE
@@ -541,7 +547,7 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
 #+END_SRC
 
 * Check What is Running 
-
+<<check>>
 At this point, you should have these services running:
 
 - LDM
@@ -601,4 +607,14 @@ RAMADDA has good integration with the IDV and the two technolgies work well toge
 #+RESULTS:
 RAMADDA has good integration with the IDV and the two technologies work well together. You may wish to install the [[http://www.unidata.ucar.edu/software/idv/docs/workshop/savingstate/Ramadda.html][RAMADDA IDV plugin]] to publish IDV bundles to RAMADDA. RAMADDA also has access to the =/data/ldm= directory so you may want to set up [[http://ramadda.org//repository/userguide/developer/filesystem.html][server-side view of this part of the file system]]. Finally,  you can enter this catalog URL in the IDV dashboard to examine data holdings shared bundles, etc. on RAMADDA [[http://unidata-server.cloudapp.net:8081/repository?output=thredds.catalog]].
 
+
+* Common Problems
+** Certificate Regeneration
+
+When using =docker-machine=  may see an error message pertaining to regenerating certificates. In this case:
+
+#+BEGIN_SRC sh :eval no :results none
+   docker-machine regenerate-certs <azure-host>
+   eval "$(docker-machine env <azure-host>)"
+#+END_SRC
 
