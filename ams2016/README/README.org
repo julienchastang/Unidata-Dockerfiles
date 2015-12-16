@@ -107,6 +107,7 @@ Finally,
 - =ssh= into new Docker host with  =docker-machine ssh <azure-host>=
 - [[config:ldmfile][Edit =ldmfile.sh=]] to correctly handle logging
 - [[config:registry][Edit =registry.xml=]] with the correct =hostname= element
+- [[starting:dc][Edit =~git/Unidata-Dockerfiles/ams2016/docker-compose.yml=]] with the correct =TDM_PW= and =TDS_HOST=.
 - Run =~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh=
 - [[check][Check]] your setup
 
@@ -222,12 +223,12 @@ Mysteriously, when you =ssh= (see next section) into the fresh VM, you are immed
   set -x 
 #+END_SRC
 
-At the very least, we will need =unzip= on the Azure Docker host.
+At the very least, we will need =unzip= on the Azure Docker host. The Unix =tree= command can also be handy.
 
 #+BEGIN_SRC sh  :results verbatim drawer :exports code :tangle ../unicloud-2.sh 
   # update and install package(s)
   sudo apt-get -qq update
-  sudo apt-get -qq install unzip
+  sudo apt-get -qq install unzip tree
 #+END_SRC
 
 ** Add =ubuntu= User to =docker= Group and Restart Docker
@@ -493,11 +494,12 @@ These directories will be used by the LDM, TDS, and RAMADDA docker containers wh
 | RAMADDA |          8081 |
 | SSL TDM |          8443 |
 | LDM     |           388 |
+| ADDE    |           112 |
 |---------+---------------|
 
-Note the TDM is an application that works in conjunction with the TDS. It creates indexes for GRIB data in the background, and notifies the TDS via port 8443 when data have been updated or changed. See [[https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html][here]] to learn more about the TDM.
+Note the TDM is an application that works in conjunction with the TDS. It creates indexes for GRIB data in the background, and notifies the TDS via port 8443 when data have been updated or changed. See [[https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html][here]] to learn more about the TDM. The ADDE port is for future use since we have not dockerized ADDE, yet.
 
-* Tomcat Logging for TDS and RAMADDA
+* Tomcat Logging for TDS/TDM and RAMADDA
 
 It is a good idea to mount Tomcat logging directories outside the container so that they can be managed for both the TDS and RAMADDA.
 
@@ -505,6 +507,7 @@ It is a good idea to mount Tomcat logging directories outside the container so t
   # Create Tomcat logging directories
   mkdir -p ~/logs/ramadda-tomcat
   mkdir -p ~/logs/tds-tomcat
+  mkdir -p ~/logs/tdm
 #+END_SRC
 
 Note there is also a logging directory in =~/tdsconfig/logs=. All these logging directories should be looked at periodically, not the least to ensure that =log= files are not filling up your system.
@@ -519,9 +522,9 @@ When you start RAMADDA for the very first time, you must have  a =password.prope
   echo ramadda.install.password=changeme! > /home/ubuntu/repository/pw.properties
 #+END_SRC
 
-*** Final Edit to =docker-compose.yml=
+*** <<starting:dc>> Final Edit to =docker-compose.yml=
 
-When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the =tdm= tomcat user. Edit the =docker-compose.yml= file and change the =TDM_PW= to =MeIndexer=. This is not as insecure as it would seem since the =tdm= user has few privileges. Optimally, one could change the password hash for the TDM user in the =tomcat-users.xml= file.
+When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the =tdm= tomcat user. Edit the =docker-compose.yml= file and change the =TDM_PW= to =MeIndexer=. This is not as insecure as it would seem since the =tdm= user has few privileges. Optimally, one could change the password hash for the TDM user in the =tomcat-users.xml= file. Also endure =TDS_HOST= is pointing to the correct Azure Docker host (e.g., =http://unidata-server.cloudapp.net=).
 
 # search for the buffer called docker-compose.yml in your emacs session
 #+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes 
@@ -586,6 +589,246 @@ From the shell where you started =docker-machine= earlier you can execute the fo
 | 4d0208f85b22 | unidata/tds:latest     | Up    |     21 | seconds |
 :END:
 
+** Checking Data Directory
+
+If you used the configuration described herein, you will have a =/data/ldm= directory tree that looks something like this created by the LDM:
+
+#+BEGIN_SRC sh :results raw drawer :export both
+tree /data/ldm -d -I '*2015*|*2016*|current' 
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+/data/ldm
+`-- pub
+    `-- native
+        |-- grid
+        |   `-- NCEP
+        |       |-- GFS
+        |       |   `-- Global_onedeg
+        |       `-- RR
+        |           `-- CONUS_13km
+        |-- radar
+        |   `-- composite
+        |       |-- gini
+        |       |   |-- dhr
+        |       |   |   `-- 1km
+        |       |   |-- dvl
+        |       |   |   `-- 1km
+        |       |   |-- eet
+        |       |   |   `-- 1km
+        |       |   |-- hhc
+        |       |   |   `-- 1km
+        |       |   |-- n0r
+        |       |   |   `-- 1km
+        |       |   |-- n1p
+        |       |   |   `-- 2km
+        |       |   `-- ntp
+        |       |       `-- 4km
+        |       `-- grib2
+        |           `-- N0R
+        `-- satellite
+            |-- 13.3
+            |   |-- EAST-CONUS_8km
+            |   |-- HI-REGIONAL_8km
+            |   |-- PR-REGIONAL_8km
+            |   `-- WEST-CONUS_8km
+            |-- 3.9
+            |   |-- AK-REGIONAL_8km
+            |   |-- EAST-CONUS_4km
+            |   |-- HI-REGIONAL_4km
+            |   |-- PR-REGIONAL_4km
+            |   `-- WEST-CONUS_4km
+            |-- 40
+            |   |-- EAST-CONUS_1km
+            |   `-- WEST-CONUS_1km
+            |-- 60
+            |   |-- AK-NATIONAL_1km
+            |   |-- HI-NATIONAL_1km
+            |   |-- PR-NATIONAL_1km
+            |   `-- SUPER-NATIONAL_1km
+            |-- CLD
+            |   `-- SUPER-NATIONAL_1km
+            |-- CTP
+            |   `-- SUPER-NATIONAL_1km
+            |-- IR
+            |   |-- AK-NATIONAL_8km
+            |   |-- AK-REGIONAL_8km
+            |   |-- EAST-CONUS_4km
+            |   |-- HI-NATIONAL_14km
+            |   |-- HI-REGIONAL_4km
+            |   |-- NHEM-COMP_24km
+            |   |-- PR-NATIONAL_8km
+            |   |-- PR-REGIONAL_4km
+            |   |-- SUPER-NATIONAL_8km
+            |   `-- WEST-CONUS_4km
+            |-- LI
+            |   `-- SUPER-NATIONAL_1km
+            |-- PRXX
+            |   |-- AK-NATIONAL_1km
+            |   |-- HI-NATIONAL_1km
+            |   |-- PR-NATIONAL_1km
+            |   `-- SUPER-NATIONAL_1km
+            |-- PW
+            |   |-- AK-NATIONAL_1km
+            |   |-- HI-NATIONAL_1km
+            |   |-- PR-NATIONAL_1km
+            |   `-- SUPER-NATIONAL_1km
+            |-- SFC-T
+            |   `-- SUPER-NATIONAL_1km
+            |-- SOUND-11.03
+            |   |-- EAST-CONUS_10km
+            |   |-- HI-NATIONAL_10km
+            |   |-- PR-NATIONAL_10km
+            |   `-- WEST-CONUS_10km
+            |-- SOUND-14.06
+            |   |-- EAST-CONUS_10km
+            |   |-- HI-NATIONAL_10km
+            |   |-- PR-NATIONAL_10km
+            |   `-- WEST-CONUS_10km
+            |-- SOUND-3.98
+            |   |-- EAST-CONUS_10km
+            |   |-- HI-NATIONAL_10km
+            |   |-- PR-NATIONAL_10km
+            |   `-- WEST-CONUS_10km
+            |-- SOUND-4.45
+            |   |-- EAST-CONUS_10km
+            |   |-- HI-NATIONAL_10km
+            |   |-- PR-NATIONAL_10km
+            |   `-- WEST-CONUS_10km
+            |-- SOUND-6.51
+            |   |-- EAST-CONUS_10km
+            |   |-- HI-NATIONAL_10km
+            |   |-- PR-NATIONAL_10km
+            |   `-- WEST-CONUS_10km
+            |-- SOUND-7.02
+            |   |-- EAST-CONUS_10km
+            |   |-- HI-NATIONAL_10km
+            |   |-- PR-NATIONAL_10km
+            |   `-- WEST-CONUS_10km
+            |-- SOUND-7.43
+            |   |-- EAST-CONUS_10km
+            |   |-- HI-NATIONAL_10km
+            |   |-- PR-NATIONAL_10km
+            |   `-- WEST-CONUS_10km
+            |-- SOUND-VIS
+            |   |-- EAST-CONUS_10km
+            |   |-- HI-NATIONAL_10km
+            |   |-- PR-NATIONAL_10km
+            |   `-- WEST-CONUS_10km
+            |-- VIS
+            |   |-- AK-NATIONAL_8km
+            |   |-- AK-REGIONAL_2km
+            |   |-- EAST-CONUS_1km
+            |   |-- HI-NATIONAL_14km
+            |   |-- HI-REGIONAL_1km
+            |   |-- NHEM-COMP_24km
+            |   |-- PR-NATIONAL_8km
+            |   |-- PR-REGIONAL_1km
+            |   |-- SUPER-NATIONAL_8km
+            |   `-- WEST-CONUS_1km
+            `-- WV
+                |-- AK-NATIONAL_8km
+                |-- AK-REGIONAL_8km
+                |-- EAST-CONUS_4km
+                |-- HI-NATIONAL_14km
+                |-- HI-REGIONAL_4km
+                |-- NHEM-COMP_24km
+                |-- PR-NATIONAL_8km
+                |-- PR-REGIONAL_4km
+                |-- SUPER-NATIONAL_8km
+                `-- WEST-CONUS_4km
+
+138 directories
+:END:
+
+Poke around for grib2 data.
+
+#+BEGIN_SRC sh :results raw drawer :export both
+find /data/ldm -name *.grib2 | awk 'BEGIN { FS = "/" } ; { print $NF }'
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+RR_CONUS_13km_20151216_2200.grib2
+RR_CONUS_13km_20151216_2100.grib2
+RR_CONUS_13km_20151216_2000.grib2
+GFS_Global_onedeg_20151216_1800.grib2
+Level3_Composite_N0R_20151216_2155.grib2
+Level3_Composite_N0R_20151216_2210.grib2
+Level3_Composite_N0R_20151216_2115.grib2
+Level3_Composite_N0R_20151216_2250.grib2
+Level3_Composite_N0R_20151216_2100.grib2
+Level3_Composite_N0R_20151216_2240.grib2
+Level3_Composite_N0R_20151216_2120.grib2
+Level3_Composite_N0R_20151216_2050.grib2
+Level3_Composite_N0R_20151216_2145.grib2
+Level3_Composite_N0R_20151216_2110.grib2
+Level3_Composite_N0R_20151216_2140.grib2
+Level3_Composite_N0R_20151216_2150.grib2
+Level3_Composite_N0R_20151216_2125.grib2
+Level3_Composite_N0R_20151216_2045.grib2
+Level3_Composite_N0R_20151216_2055.grib2
+Level3_Composite_N0R_20151216_2200.grib2
+Level3_Composite_N0R_20151216_2245.grib2
+Level3_Composite_N0R_20151216_2230.grib2
+Level3_Composite_N0R_20151216_2300.grib2
+Level3_Composite_N0R_20151216_2040.grib2
+Level3_Composite_N0R_20151216_2305.grib2
+Level3_Composite_N0R_20151216_2135.grib2
+Level3_Composite_N0R_20151216_2225.grib2
+Level3_Composite_N0R_20151216_2105.grib2
+Level3_Composite_N0R_20151216_2130.grib2
+Level3_Composite_N0R_20151216_2205.grib2
+Level3_Composite_N0R_20151216_2215.grib2
+Level3_Composite_N0R_20151216_2255.grib2
+Level3_Composite_N0R_20151216_2235.grib2
+Level3_Composite_N0R_20151216_2220.grib2
+:END:
+
+Search for GRIB index files (=gbx9=). If you do not see them, see the section about a [[appendix:tdm][finicky TDM]] in the in the Appendix.
+
+#+BEGIN_SRC sh :results raw drawer :export both
+find /data/ldm -name *.gbx9 | awk 'BEGIN { FS = "/" } ; { print $NF }'
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+RR_CONUS_13km_20151216_2200.grib2.gbx9
+RR_CONUS_13km_20151216_2100.grib2.gbx9
+RR_CONUS_13km_20151216_2000.grib2.gbx9
+GFS_Global_onedeg_20151216_1800.grib2.gbx9
+Level3_Composite_N0R_20151216_2205.grib2.gbx9
+Level3_Composite_N0R_20151216_2145.grib2.gbx9
+Level3_Composite_N0R_20151216_2305.grib2.gbx9
+Level3_Composite_N0R_20151216_2040.grib2.gbx9
+Level3_Composite_N0R_20151216_2215.grib2.gbx9
+Level3_Composite_N0R_20151216_2225.grib2.gbx9
+Level3_Composite_N0R_20151216_2050.grib2.gbx9
+Level3_Composite_N0R_20151216_2300.grib2.gbx9
+Level3_Composite_N0R_20151216_2135.grib2.gbx9
+Level3_Composite_N0R_20151216_2155.grib2.gbx9
+Level3_Composite_N0R_20151216_2130.grib2.gbx9
+Level3_Composite_N0R_20151216_2240.grib2.gbx9
+Level3_Composite_N0R_20151216_2125.grib2.gbx9
+Level3_Composite_N0R_20151216_2235.grib2.gbx9
+Level3_Composite_N0R_20151216_2200.grib2.gbx9
+Level3_Composite_N0R_20151216_2250.grib2.gbx9
+Level3_Composite_N0R_20151216_2055.grib2.gbx9
+Level3_Composite_N0R_20151216_2110.grib2.gbx9
+Level3_Composite_N0R_20151216_2150.grib2.gbx9
+Level3_Composite_N0R_20151216_2115.grib2.gbx9
+Level3_Composite_N0R_20151216_2105.grib2.gbx9
+Level3_Composite_N0R_20151216_2245.grib2.gbx9
+Level3_Composite_N0R_20151216_2220.grib2.gbx9
+Level3_Composite_N0R_20151216_2140.grib2.gbx9
+Level3_Composite_N0R_20151216_2100.grib2.gbx9
+Level3_Composite_N0R_20151216_2255.grib2.gbx9
+Level3_Composite_N0R_20151216_2045.grib2.gbx9
+Level3_Composite_N0R_20151216_2120.grib2.gbx9
+Level3_Composite_N0R_20151216_2210.grib2.gbx9
+Level3_Composite_N0R_20151216_2230.grib2.gbx9
+:END:
 
 ** TDS and RAMADDA URLs
 
@@ -618,7 +861,6 @@ RAMADDA has good integration with the IDV and the two technolgies work well toge
 #+RESULTS:
 RAMADDA has good integration with the IDV and the two technologies work well together. You may wish to install the [[http://www.unidata.ucar.edu/software/idv/docs/workshop/savingstate/Ramadda.html][RAMADDA IDV plugin]] to publish IDV bundles to RAMADDA. RAMADDA also has access to the =/data/ldm= directory so you may want to set up [[http://ramadda.org//repository/userguide/developer/filesystem.html][server-side view of this part of the file system]]. Finally,  you can enter this catalog URL in the IDV dashboard to examine data holdings shared bundles, etc. on RAMADDA [[http://unidata-server.cloudapp.net:8081/repository?output=thredds.catalog]].
 
-
 * Appendix  
 ** Common Problems
 *** Certificate Regeneration
@@ -648,3 +890,14 @@ ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c
 #+END_EXAMPLE
 
 it is possible you did not create a sufficiently large VM. Try  [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/][increasing the size of the VM]] .
+*** <<appendix:tdm>> Finicky TDM
+
+If you are not finding the data you expect to see via the THREDDS catalog.xml tree check the TDM logs in =~/logs/tdm=.Also try restarting the TDM on the Azure Docker host:
+
+#+BEGIN_SRC sh :eval no
+cd ~/git/Unidata-Dockerfiles/ams2016
+docker-compose stop tdm
+docker-compose run -d tdm 
+#+END_SRC
+
+You may also just have to *wait*. It can take a few hours for the TDM to catch up to what is going on in the =/data/ldm= directory.

@@ -19,6 +19,7 @@ tdm:
   volumes:
     - /data/:/data/
     - ~/tdsconfig/:/usr/local/tomcat/content/thredds/
+    - ~/logs/tdm/:/usr/local/tomcat/content/tdm/
   environment:
     # change the password
     - TDM_PW=CHANGEME!
