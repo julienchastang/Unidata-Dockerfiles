@@ -118,9 +118,7 @@ The VM we are about to create will be our **Docker Host** from where we will run
 
 [Install](https://docs.docker.com/machine/install-machine/) `docker-machine` on your local computer. `docker-machine` is a command line tool that gives users the ability to create Docker VMs on your local computer or on a cloud provider such as Azure.
 
-## Create a VM on Azure.<a id="orgheadline4"></a>
-
-<a id="orgtarget1"></a>
+## <a id="orgtarget1"></a> Create a VM on Azure.<a id="orgheadline4"></a>
 
 The following `docker-machine` command will create a Docker VM on Azure for running various Unidata Docker containers. **Replace the environment variables with your choices**. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply `azure-subscription-id` and `azure-subscription-cert` path. See the Azure `docker-machine` [instructions](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/), if you have questions about this process. Also set  [the size of the VM](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/)  (e.g., `Small`, `ExtraLarge`) and supply the name of the Azure Docker host.
 
@@ -277,9 +275,8 @@ Also, remember that these files will be used **inside** the LDM container that w
         unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
         cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
 
-5.  Edit `ldmfile.sh`
+5.  <a id="orgtarget2"></a> Edit `ldmfile.sh`
 
-    <a id="orgtarget2"></a>
     Open the `etc/TDS/util/ldmfile.sh` file in the editor of your choice. As the top of this file indicates, you must edit the `logfile` to suit your needs. Change the 
     
         logfile=logs/ldm-mcidas.log
@@ -565,9 +562,8 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
     # Start up all images
     docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 
-# Check What is Running<a id="orgheadline43"></a>
+# <a id="orgtarget3"></a> Check What is Running<a id="orgheadline43"></a>
 
-<a id="orgtarget3"></a>
 In this section, we will assume you have created a VM called `unidata-server`.You should have these services running:
 
 -   LDM

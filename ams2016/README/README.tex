@@ -1,4 +1,4 @@
-% Created 2015-12-16 Wed 12:37
+% Created 2015-12-16 Wed 13:01
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -78,9 +78,9 @@ The VM we are about to create will be our \textbf{Docker Host} from where we wil
 
 \href{https://docs.docker.com/machine/install-machine/}{Install} \texttt{docker-machine} on your local computer. \texttt{docker-machine} is a command line tool that gives users the ability to create Docker VMs on your local computer or on a cloud provider such as Azure.
 
-\subsection{Create a VM on Azure.}
+\subsection{\label{orgtarget1} Create a VM on Azure.}
 \label{sec:orgheadline4}
-\label{orgtarget1}
+
 
 The following \texttt{docker-machine} command will create a Docker VM on Azure for running various Unidata Docker containers. \textbf{Replace the environment variables with your choices}. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply \texttt{azure-subscription-id} and \texttt{azure-subscription-cert} path. See the Azure \texttt{docker-machine} \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/}{instructions}, if you have questions about this process. Also set  \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/}{the size of the VM}  (e.g., \texttt{Small}, \texttt{ExtraLarge}) and supply the name of the Azure Docker host.
 
@@ -293,9 +293,9 @@ unzip ~/tdsconfig/config.zip -d ~/tdsconfig/
 cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
 \end{verbatim}
 
-\item Edit \texttt{ldmfile.sh}
+\item \label{orgtarget2} Edit \texttt{ldmfile.sh}
 \label{sec:orgheadline21}
-\label{orgtarget2}
+
 Open the \texttt{etc/TDS/util/ldmfile.sh} file in the editor of your choice. As the top of this file indicates, you must edit the \texttt{logfile} to suit your needs. Change the 
 
 \begin{verbatim}
@@ -464,9 +464,9 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
 docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 \end{verbatim}
 
-\section{Check What is Running}
+\section{\label{orgtarget3} Check What is Running}
 \label{sec:orgheadline43}
-\label{orgtarget3}
+
 In this section, we will assume you have created a VM called \texttt{unidata-server}.You should have these services running:
 
 \begin{itemize}

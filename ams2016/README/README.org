@@ -112,8 +112,8 @@ The VM we are about to create will be our *Docker Host* from where we will run D
 
 [[https://docs.docker.com/machine/install-machine/][Install]] =docker-machine= on your local computer. =docker-machine= is a command line tool that gives users the ability to create Docker VMs on your local computer or on a cloud provider such as Azure.
 
-** Create a VM on Azure.
-<<prelim:azure>>
+** <<prelim:azure>> Create a VM on Azure.
+
 
 # Setting up unicloud-1.sh for tangling
 #+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh :shebang "#!/bin/bash" :exports none
@@ -385,8 +385,8 @@ In the =ldmd.conf= file we copied just a moment ago there is a reference to a =p
   cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
 #+END_SRC
 
-**** Edit =ldmfile.sh=
-<<config:ldmfile>>
+**** <<config:ldmfile>> Edit =ldmfile.sh=
+
 Open the =etc/TDS/util/ldmfile.sh= file in the editor of your choice. As the top of this file indicates, you must edit the =logfile= to suit your needs. Change the 
 
 #+BEGIN_EXAMPLE
@@ -551,8 +551,8 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
   docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 #+END_SRC
 
-* Check What is Running 
-<<check>>
+* <<check>> Check What is Running 
+
 In this section, we will assume you have created a VM called =unidata-server=.You should have these services running:
 
 - LDM

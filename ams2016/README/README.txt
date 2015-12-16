@@ -151,8 +151,6 @@ _________________
 3.2 Create a VM on Azure.
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-
   The following `docker-machine' command will create a Docker VM on
   Azure for running various Unidata Docker containers. *Replace the
   environment variables with your choices*. This command will take a few
@@ -460,7 +458,6 @@ _________________
 
 * 4.3.2.5 Edit `ldmfile.sh'
 
-
   Open the `etc/TDS/util/ldmfile.sh' file in the editor of your
   choice. As the top of this file indicates, you must edit the `logfile'
   to suit your needs. Change the
@@ -696,7 +693,6 @@ _________________
 
 9 Check What is Running
 =======================
-
 
   In this section, we will assume you have created a VM called
   `unidata-server'.You should have these services running:

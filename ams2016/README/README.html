@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2015-12-16 Wed 12:37 -->
+<!-- 2015-12-16 Wed 13:01 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>AMS 2016: UniCloud, Docker at Unidata</title>
@@ -309,12 +309,8 @@ The VM we are about to create will be our <b>Docker Host</b> from where we will 
 </div>
 
 <div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4"><span class="section-number-3">3.2</span> Create a VM on Azure.</h3>
+<h3 id="orgheadline4"><span class="section-number-3">3.2</span> <a id="orgtarget1"></a> Create a VM on Azure.</h3>
 <div class="outline-text-3" id="text-3-2">
-<p>
-<a id="orgtarget1"></a>
-</p>
-
 <p>
 The following <code>docker-machine</code> command will create a Docker VM on Azure for running various Unidata Docker containers. <b>Replace the environment variables with your choices</b>. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply <code>azure-subscription-id</code> and <code>azure-subscription-cert</code> path. See the Azure <code>docker-machine</code> <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/">instructions</a>, if you have questions about this process. Also set  <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/">the size of the VM</a>  (e.g., <code>Small</code>, <code>ExtraLarge</code>) and supply the name of the Azure Docker host.
 </p>
@@ -621,9 +617,8 @@ cp -r ~/tdsconfig/pqacts/* ~/etc/TDS
 </div>
 </div></li>
 
-<li><a id="orgheadline21"></a>Edit <code>ldmfile.sh</code><br  /><div class="outline-text-5" id="text-4-3-2-5">
+<li><a id="orgheadline21"></a><a id="orgtarget2"></a> Edit <code>ldmfile.sh</code><br  /><div class="outline-text-5" id="text-4-3-2-5">
 <p>
-<a id="orgtarget2"></a>
 Open the <code>etc/TDS/util/ldmfile.sh</code> file in the editor of your choice. As the top of this file indicates, you must edit the <code>logfile</code> to suit your needs. Change the 
 </p>
 
@@ -1007,10 +1002,9 @@ docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 </div>
 
 <div id="outline-container-orgheadline43" class="outline-2">
-<h2 id="orgheadline43"><span class="section-number-2">9</span> Check What is Running</h2>
+<h2 id="orgheadline43"><span class="section-number-2">9</span> <a id="orgtarget3"></a> Check What is Running</h2>
 <div class="outline-text-2" id="text-9">
 <p>
-<a id="orgtarget3"></a>
 In this section, we will assume you have created a VM called <code>unidata-server</code>.You should have these services running:
 </p>
 
@@ -1194,7 +1188,7 @@ it is possible you did not create a sufficiently large VM. Try  <a href="https:/
 <div id="postamble" class="status">
 <p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-12-15 Tue&gt;</span></span></p>
 <p class="author">Author: Julien Chastang (UCAR, Unidata)</p>
-<p class="date">Created: 2015-12-16 Wed 12:37</p>
+<p class="date">Created: 2015-12-16 Wed 13:01</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
