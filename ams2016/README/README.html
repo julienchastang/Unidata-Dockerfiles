@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2015-12-16 Wed 13:01 -->
+<!-- 2015-12-16 Wed 13:20 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>AMS 2016: UniCloud, Docker at Unidata</title>
@@ -260,7 +260,7 @@ In order to best understand this configuratation process, it is recommmended to 
 <ul class="org-ul">
 <li><code>git clone https://github.com/Unidata/Unidata-Dockerfiles</code></li>
 <li><a href="https://docs.docker.com/machine/install-machine/">Download and install</a> <code>docker-machine</code></li>
-<li>Run the <code>Unidata-Dockerfiles/ams2016/unicloud-1.sh</code> script (this will take few minutes) to create the Docker host on Azure. See the <a href="#orgtarget1">section on Azure</a> for more information.</li>
+<li>Run the <code>Unidata-Dockerfiles/ams2016/unicloud-1.sh</code> script (this will take few minutes) to  <a href="#orgtarget1">create the Docker host on Azure</a>.</li>
 </ul>
 
 <p>
@@ -286,8 +286,16 @@ Now you are ready to do additional configuration on the new Docker host:
 </div>
 
 <p>
-<code>ssh</code> into new Docker host with  <code>docker-machine ssh &lt;azure-host&gt;</code>. See the <a href="#orgtarget2">section below</a> about editing the <code>ldmfile.sh</code> to correctly handle logging. Run <code>~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh</code>. See the section on <a href="#orgtarget3">checking</a> what you have done.
+Finally,
 </p>
+
+<ul class="org-ul">
+<li><code>ssh</code> into new Docker host with  <code>docker-machine ssh &lt;azure-host&gt;</code></li>
+<li><a href="#orgtarget2">Edit <code>ldmfile.sh</code></a> to correctly handle logging</li>
+<li><a href="#orgtarget3">Edit <code>registry.xml</code></a> with the correct <code>hostname</code> element</li>
+<li>Run <code>~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh</code></li>
+<li><a href="#orgtarget4">Check</a> your setup</li>
+</ul>
 </div>
 </div>
 
@@ -577,7 +585,7 @@ For your information, and for future reference, there is a <code>~/git/TdConfig/
 </p>
 </div></li>
 
-<li><a id="orgheadline18"></a><code>registry.xml</code><br  /><div class="outline-text-5" id="text-4-3-2-2">
+<li><a id="orgheadline18"></a><a id="orgtarget3"></a> <code>registry.xml</code><br  /><div class="outline-text-5" id="text-4-3-2-2">
 <div class="org-src-container">
 
 <pre class="src src-sh">cp ~/git/Unidata-Dockerfiles/ams2016/registry.xml ~/etc/
@@ -1002,7 +1010,7 @@ docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 </div>
 
 <div id="outline-container-orgheadline43" class="outline-2">
-<h2 id="orgheadline43"><span class="section-number-2">9</span> <a id="orgtarget3"></a> Check What is Running</h2>
+<h2 id="orgheadline43"><span class="section-number-2">9</span> <a id="orgtarget4"></a> Check What is Running</h2>
 <div class="outline-text-2" id="text-9">
 <p>
 In this section, we will assume you have created a VM called <code>unidata-server</code>.You should have these services running:
@@ -1188,7 +1196,7 @@ it is possible you did not create a sufficiently large VM. Try  <a href="https:/
 <div id="postamble" class="status">
 <p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-12-15 Tue&gt;</span></span></p>
 <p class="author">Author: Julien Chastang (UCAR, Unidata)</p>
-<p class="date">Created: 2015-12-16 Wed 13:01</p>
+<p class="date">Created: 2015-12-16 Wed 13:20</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

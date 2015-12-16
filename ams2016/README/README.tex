@@ -1,4 +1,4 @@
-% Created 2015-12-16 Wed 13:01
+% Created 2015-12-16 Wed 13:20
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -49,7 +49,7 @@ In order to best understand this configuratation process, it is recommmended to 
 \begin{itemize}
 \item \texttt{git clone https://github.com/Unidata/Unidata-Dockerfiles}
 \item \href{https://docs.docker.com/machine/install-machine/}{Download and install} \texttt{docker-machine}
-\item Run the \texttt{Unidata-Dockerfiles/ams2016/unicloud-1.sh} script (this will take few minutes) to create the Docker host on Azure. See the \hyperref[orgtarget1]{section on Azure} for more information.
+\item Run the \texttt{Unidata-Dockerfiles/ams2016/unicloud-1.sh} script (this will take few minutes) to  \hyperref[orgtarget1]{create the Docker host on Azure}.
 \end{itemize}
 
 For example,
@@ -66,7 +66,15 @@ docker-machine ssh <azure-host> "bash -s" < \
     Unidata-Dockerfiles/ams2016/unicloud-2.sh
 \end{verbatim}
 
-\texttt{ssh} into new Docker host with  \texttt{docker-machine ssh <azure-host>}. See the \hyperref[orgtarget2]{section below} about editing the \texttt{ldmfile.sh} to correctly handle logging. Run \texttt{\textasciitilde{}/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh}. See the section on \hyperref[orgtarget3]{checking} what you have done.
+Finally,
+
+\begin{itemize}
+\item \texttt{ssh} into new Docker host with  \texttt{docker-machine ssh <azure-host>}
+\item \hyperref[orgtarget2]{Edit \texttt{ldmfile.sh}} to correctly handle logging
+\item \hyperref[orgtarget3]{Edit \texttt{registry.xml}} with the correct \texttt{hostname} element
+\item Run \texttt{\textasciitilde{}/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh}
+\item \hyperref[orgtarget4]{Check} your setup
+\end{itemize}
 
 \section{Preliminary Setup on Azure}
 \label{sec:orgheadline11}
@@ -262,7 +270,7 @@ This \texttt{ldmd.conf} has been setup for the AMS 2016 demonstration serving th
 \\
 For your information, and for future reference, there is a \texttt{\textasciitilde{}/git/TdConfig/idd/pqacts/README.txt} file that may be helpful in writing a suitable \texttt{ldmd.conf} file.
 
-\item \texttt{registry.xml}
+\item \label{orgtarget3} \texttt{registry.xml}
 \label{sec:orgheadline18}
 
 \begin{verbatim}
@@ -464,7 +472,7 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
 docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 \end{verbatim}
 
-\section{\label{orgtarget3} Check What is Running}
+\section{\label{orgtarget4} Check What is Running}
 \label{sec:orgheadline43}
 
 In this section, we will assume you have created a VM called \texttt{unidata-server}.You should have these services running:

@@ -86,7 +86,7 @@ In order to best understand this configuratation process, it is recommmended to 
 
    - =git clone https://github.com/Unidata/Unidata-Dockerfiles=
    - [[https://docs.docker.com/machine/install-machine/][Download and install]] =docker-machine=
-   - Run the =Unidata-Dockerfiles/ams2016/unicloud-1.sh= script (this will take few minutes) to create the Docker host on Azure. See the [[prelim:azure][section on Azure]] for more information.
+   - Run the =Unidata-Dockerfiles/ams2016/unicloud-1.sh= script (this will take few minutes) to  [[prelim:azure][create the Docker host on Azure]].
 
 For example,
 
@@ -102,7 +102,13 @@ Now you are ready to do additional configuration on the new Docker host:
       Unidata-Dockerfiles/ams2016/unicloud-2.sh
 #+END_SRC
 
- =ssh= into new Docker host with  =docker-machine ssh <azure-host>=. See the [[config:ldmfile][section below]] about editing the =ldmfile.sh= to correctly handle logging. Run =~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh=. See the section on [[check][checking]] what you have done.
+Finally,
+
+- =ssh= into new Docker host with  =docker-machine ssh <azure-host>=
+- [[config:ldmfile][Edit =ldmfile.sh=]] to correctly handle logging
+- [[config:registry][Edit =registry.xml=]] with the correct =hostname= element
+- Run =~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh=
+- [[check][Check]] your setup
 
 * Preliminary Setup on Azure
 
@@ -352,13 +358,13 @@ Also, remember that these files will be used *inside* the LDM container that we 
 \\
 For your information, and for future reference, there is a =~/git/TdConfig/idd/pqacts/README.txt= file that may be helpful in writing a suitable =ldmd.conf= file.
 
-**** =registry.xml=
+**** <<config:registry>> =registry.xml=
 
  #+BEGIN_SRC sh  :results silent :exports code :tangle ../unicloud-2.sh
    cp ~/git/Unidata-Dockerfiles/ams2016/registry.xml ~/etc/
  #+END_SRC
 
- This file has been set up for the AMS 2016 demonstration. Otherwise you would have to edit the =registry.xml= to ensure the =hostname= element is correct. For your own cloud VMs, work with =support-idd@unidata.ucar.edu= to devise a correct =hostname= element so that LDM statistics get properly reported. Here is an example =hostname= element: =unidata-server.azure.unidata.ucar.edu=.
+This file has been set up for the AMS 2016 demonstration. Otherwise you would have to edit the =registry.xml= to ensure the =hostname= element is correct. For your own cloud VMs, work with =support-idd@unidata.ucar.edu= to devise a correct =hostname= element so that LDM statistics get properly reported. Here is an example =hostname= element: =unidata-server.azure.unidata.ucar.edu=.
 
 # search for the buffer called registry.xml in your emacs session
  #+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes 

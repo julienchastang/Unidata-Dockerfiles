@@ -102,8 +102,7 @@ _________________
   - `git clone https://github.com/Unidata/Unidata-Dockerfiles'
   - [Download and install] `docker-machine'
   - Run the `Unidata-Dockerfiles/ams2016/unicloud-1.sh' script (this
-    will take few minutes) to create the Docker host on Azure. See the
-    section on Azure for more information.
+    will take few minutes) to create the Docker host on Azure.
 
   For example,
 
@@ -120,10 +119,13 @@ _________________
   |     Unidata-Dockerfiles/ams2016/unicloud-2.sh
   `----
 
-  `ssh' into new Docker host with `docker-machine ssh <azure-host>'. See
-  the section below about editing the `ldmfile.sh' to correctly handle
-  logging. Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh'. See
-  the section on checking what you have done.
+  Finally,
+
+  - `ssh' into new Docker host with `docker-machine ssh <azure-host>'
+  - Edit `ldmfile.sh' to correctly handle logging
+  - Edit `registry.xml' with the correct `hostname' element
+  - Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh'
+  - Check your setup
 
 
   [Download and install]

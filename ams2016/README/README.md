@@ -96,7 +96,7 @@ In order to best understand this configuratation process, it is recommmended to 
 
 -   `git clone https://github.com/Unidata/Unidata-Dockerfiles`
 -   [Download and install](https://docs.docker.com/machine/install-machine/) `docker-machine`
--   Run the `Unidata-Dockerfiles/ams2016/unicloud-1.sh` script (this will take few minutes) to create the Docker host on Azure. See the [section on Azure](#orgtarget1) for more information.
+-   Run the `Unidata-Dockerfiles/ams2016/unicloud-1.sh` script (this will take few minutes) to  [create the Docker host on Azure](#orgtarget1).
 
 For example,
 
@@ -108,7 +108,13 @@ Now you are ready to do additional configuration on the new Docker host:
     docker-machine ssh <azure-host> "bash -s" < \
         Unidata-Dockerfiles/ams2016/unicloud-2.sh
 
-`ssh` into new Docker host with  `docker-machine ssh <azure-host>`. See the [section below](#orgtarget2) about editing the `ldmfile.sh` to correctly handle logging. Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh`. See the section on [checking](#orgtarget3) what you have done.
+Finally,
+
+-   `ssh` into new Docker host with  `docker-machine ssh <azure-host>`
+-   [Edit `ldmfile.sh`](#orgtarget2) to correctly handle logging
+-   [Edit `registry.xml`](#orgtarget3) with the correct `hostname` element
+-   Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh`
+-   [Check](#orgtarget4) your setup
 
 # Preliminary Setup on Azure<a id="orgheadline11"></a>
 
@@ -253,7 +259,7 @@ Also, remember that these files will be used **inside** the LDM container that w
       
     For your information, and for future reference, there is a `~/git/TdConfig/idd/pqacts/README.txt` file that may be helpful in writing a suitable `ldmd.conf` file.
 
-2.  `registry.xml`
+2.  <a id="orgtarget3"></a> `registry.xml`
 
         cp ~/git/Unidata-Dockerfiles/ams2016/registry.xml ~/etc/
     
@@ -562,7 +568,7 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
     # Start up all images
     docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 
-# <a id="orgtarget3"></a> Check What is Running<a id="orgheadline43"></a>
+# <a id="orgtarget4"></a> Check What is Running<a id="orgheadline43"></a>
 
 In this section, we will assume you have created a VM called `unidata-server`.You should have these services running:
 
