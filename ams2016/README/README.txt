@@ -537,8 +537,9 @@ _________________
   *ephemeral* so be careful! Azure makes no effort to backup data on
   `/mnt'. For the LDM this should not be too much of a problem because
   real time data is coming in and getting scoured continuously, but for
-  _RAMADDA you may wish to be careful as there is the potential to lose
-  user data_. There is more information about this topic [here].
+  _for any other application you may wish to be careful as there is the
+  potential to lose data_. There is more information about this topic
+  [here].
 
 
   [here]
@@ -578,7 +579,7 @@ _________________
   | sudo mkdir /mnt/ldm/
   | sudo chown -R ubuntu:docker /data/ldm
   | sudo mkdir /mnt/repository/
-  | sudo chown -R ubuntu:docker /data/repository
+  | sudo chown -R ubuntu:docker /home/ubuntu/repository
   `----
 
   These directories will be used by the LDM, TDS, and RAMADDA docker
@@ -640,13 +641,13 @@ _________________
 
   When you start RAMADDA for the very first time, you must have a
   `password.properties' file in the RAMADDA home directory which is
-  `/data/repository/'. See [RAMADDA documentation] for more details on
-  setting up RAMADDA. Here is a `pw.properties' file to get you
-  going. Change password below to something more secure!
+  `/home/ubuntu/repository/'. See [RAMADDA documentation] for more
+  details on setting up RAMADDA. Here is a `pw.properties' file to get
+  you going. Change password below to something more secure!
 
   ,----
   | # Create RAMADDA default password
-  | echo ramadda.install.password=changeme! > /data/repository/pw.properties
+  | echo ramadda.install.password=changeme! > /home/ubuntu/repository/pw.properties
   `----
 
 

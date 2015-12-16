@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2015-12-16 Wed 10:35 -->
+<!-- 2015-12-16 Wed 10:45 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>AMS 2016: UniCloud, Docker at Unidata</title>
@@ -702,7 +702,7 @@ Let's see what is available in the <code>~/tdsconfig</code> directory.
 <h2 id="orgheadline30"><span class="section-number-2">5</span> Setting up Data Volumes</h2>
 <div class="outline-text-2" id="text-5">
 <p>
-As alluded to earlier, we will have to set up data volumes so that the LDM can write data, and the TDS and RAMADDA can have access to that data. The <code>/mnt</code> has lots of space, but the storage is considered <b>ephemeral</b> so be careful! Azure makes no effort to backup data on <code>/mnt</code>. For the LDM this should not be too much of a problem because real time data is coming in and getting scoured continuously, but for <span class="underline">RAMADDA you may wish to be careful as there is the potential to lose user data</span>. There is more information about this topic <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-how-to-attach-disk/">here</a>.
+As alluded to earlier, we will have to set up data volumes so that the LDM can write data, and the TDS and RAMADDA can have access to that data. The <code>/mnt</code> has lots of space, but the storage is considered <b>ephemeral</b> so be careful! Azure makes no effort to backup data on <code>/mnt</code>. For the LDM this should not be too much of a problem because real time data is coming in and getting scoured continuously, but for <span class="underline">for any other application you may wish to be careful as there is the potential to lose data</span>. There is more information about this topic <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-how-to-attach-disk/">here</a>.
 </p>
 </div>
 
@@ -855,7 +855,7 @@ sudo ln -s /mnt /data
 sudo mkdir /mnt/ldm/
 sudo chown -R ubuntu:docker /data/ldm
 sudo mkdir /mnt/repository/
-sudo chown -R ubuntu:docker /data/repository
+sudo chown -R ubuntu:docker /home/ubuntu/repository
 </pre>
 </div>
 
@@ -949,13 +949,13 @@ Note there is also a logging directory in <code>~/tdsconfig/logs</code>. All the
 <h4 id="orgheadline33"><span class="section-number-4">8.0.1</span> RAMADDA Preconfiguration</h4>
 <div class="outline-text-4" id="text-8-0-1">
 <p>
-When you start RAMADDA for the very first time, you must have  a <code>password.properties</code> file in the RAMADDA home directory which is <code>/data/repository/</code>. See <a href="http://ramadda.org//repository/userguide/toc.html">RAMADDA documentation</a> for more details on setting up RAMADDA. Here is a <code>pw.properties</code> file to get you going. Change password below to something more secure!
+When you start RAMADDA for the very first time, you must have  a <code>password.properties</code> file in the RAMADDA home directory which is <code>/home/ubuntu/repository/</code>. See <a href="http://ramadda.org//repository/userguide/toc.html">RAMADDA documentation</a> for more details on setting up RAMADDA. Here is a <code>pw.properties</code> file to get you going. Change password below to something more secure!
 </p>
 
 <div class="org-src-container">
 
 <pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Create RAMADDA default password</span>
-<span style="color: #006FE0;">echo</span> ramadda.install.password=changeme! &gt; /data/repository/pw.properties
+<span style="color: #006FE0;">echo</span> ramadda.install.password=changeme! &gt; /home/ubuntu/repository/pw.properties
 </pre>
 </div>
 </div>
@@ -1194,7 +1194,7 @@ it is possible you did not create a sufficiently large VM. Try  <a href="https:/
 <div id="postamble" class="status">
 <p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-12-15 Tue&gt;</span></span></p>
 <p class="author">Author: Julien Chastang (UCAR, Unidata)</p>
-<p class="date">Created: 2015-12-16 Wed 10:35</p>
+<p class="date">Created: 2015-12-16 Wed 10:45</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
