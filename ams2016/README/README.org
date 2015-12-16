@@ -110,7 +110,7 @@ Finally,
 - Run =~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh=
 - [[check][Check]] your setup
 
-* Preliminary Setup on Azure
+* Start of Long Form Instructions and Preliminary Setup on Azure
 
 The VM we are about to create will be our *Docker Host* from where we will run Docker containers for the LDM, TDS, and RAMADDA.
 
