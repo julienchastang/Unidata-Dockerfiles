@@ -16,7 +16,7 @@ _________________
 1 Preamble
 2 Quick Start
 3 Preliminary Setup on Azure
-.. 3.1 `docker-machine'
+.. 3.1 Install `docker-machine'
 .. 3.2 Create a VM on Azure.
 .. 3.3 Configure Unix Shell to Interact with New Azure VM.
 .. 3.4 Restart Azure VM
@@ -51,8 +51,9 @@ _________________
 .. 9.3 Viewing Data with the IDV
 ..... 9.3.1 Access TDS with the IDV
 ..... 9.3.2 Access RAMADDAA with the IDV
-10 Common Problems
-.. 10.1 Certificate Regeneration
+10 Appendix
+.. 10.1 Common Problems
+..... 10.1.1 Certificate Regeneration
 
 
 
@@ -61,26 +62,25 @@ _________________
 1 Preamble
 ==========
 
-  The following instructions describe how to configure a [Microsoft
-  Azure VM] serving data with the [LDM], [TDS], and [RAMADDA]. This
-  document assumes you have access to Azure resources though these
-  instructions should be fairly similar on other cloud providers (e.g.,
-  Amazon). They also assume familiarity with Unix, Docker, and Unidata
-  technology in general. You must have `sudo' priviliges on the Azure
-  host which will hopfully be provided to you be default. You must be
-  comfortable entering commands at the Unix command line. We will be
-  using Docker images defined at the [Unidata-Dockerfiles repository] in
-  addition to a configuration specifically planned for AMS 2016
-  demonstrations project [AMS 2016 demonstrations project].
+  This guide describes how to configure the [LDM], [TDS], and [RAMADDA]
+  on a [Microsoft Azure VM]. The document assumes you have access to
+  Azure resources though these instructions should be fairly similar on
+  other cloud providers (e.g., Amazon). They also require familiarity
+  with Unix, Docker, and Unidata technology in general. You must have
+  `sudo' priviliges on the Azure host which will hopefully be available
+  you. You must be comfortable entering commands at the Unix command
+  line. We will be using Docker images defined at the
+  [Unidata-Dockerfiles repository] in addition to a configuration
+  specifically planned for an [AMS 2016 demonstrations project].
 
-
-  [Microsoft Azure VM] https://azure.microsoft.com
 
   [LDM] http://www.unidata.ucar.edu/software/ldm/
 
   [TDS] http://www.unidata.ucar.edu/software/thredds/current/tds/
 
   [RAMADDA] http://sourceforge.net/projects/ramadda/
+
+  [Microsoft Azure VM] https://azure.microsoft.com
 
   [Unidata-Dockerfiles repository]
   https://github.com/Unidata/Unidata-Dockerfiles
@@ -92,22 +92,22 @@ _________________
 2 Quick Start
 =============
 
-  In order to understand what you are doing, it is best read the
-  complete contents of this document and follow the instructions
-  herein. And if there are problems you will be able to reason about the
-  errors. However, if you are champing at the bit, you can run the
-  following commands to quickly get you going.
+  In order to best understand this configuratation process, it is
+  recommmended to read the complete contents of this document and follow
+  the instructions starting in the next section. If there are problems
+  you will be able to reason about the errors. However, if you are eager
+  to get started, you can follow this quick start section.
 
   - `git clone https://github.com/Unidata/Unidata-Dockerfiles'
   - [Download and install] `docker-machine'
   - Run the `Unidata-Dockerfiles/ams2016/unicloud-1.sh' script (this
-    will take few minutes). See the section on Azure for more
-    information.
+    will take few minutes) to create the Docker host on Azure. See the
+    section on Azure for more information.
 
   For example,
 
   ,----
-  | unicloud-1.sh --azure-host "unidata-server" --azure-subscription-id "3.14" \
+  | unicloud-1.sh --azure-host <azure-host> --azure-subscription-id "3.14" \
   |               --azure-subscription-cert "/path/to/mycert.pem"
   `----
 
@@ -119,11 +119,10 @@ _________________
   |     Unidata-Dockerfiles/ams2016/unicloud-2.sh
   `----
 
-  You are almost done. `ssh' into new Docker host with `docker-machine
-  ssh <azure-host>'. See the section below about editing the
-  `ldmfile.sh' to correctly handle logging. Run
-  `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh'. See section on
-  checking what you have done.
+  `ssh' into new Docker host with `docker-machine ssh <azure-host>'. See
+  the section below about editing the `ldmfile.sh' to correctly handle
+  logging. Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh'. See
+  the section on checking what you have done.
 
 
   [Download and install]
@@ -133,15 +132,12 @@ _________________
 3 Preliminary Setup on Azure
 ============================
 
-  The instructions assume we will create an Azure VM called
-  `unidata-server.cloudapp.net' abbreviated to `unidata-server'. Tailor
-  the VM name for your purposes when following this document. This VM
-  will be our *Docker Host* from where we will run Docker containers for
-  the LDM, TDS, and RAMADDA.
+  The VM we are about to create will be our *Docker Host* from where we
+  will run Docker containers for the LDM, TDS, and RAMADDA.
 
 
-3.1 `docker-machine'
-~~~~~~~~~~~~~~~~~~~~
+3.1 Install `docker-machine'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   [Install] `docker-machine' on your local computer. `docker-machine' is
   a command line tool that gives users the ability to create Docker VMs
@@ -158,13 +154,13 @@ _________________
 
 
   The following `docker-machine' command will create a Docker VM on
-  Azure in which you will run various Docker containers. It will take a
-  few minutes to run (between 5 and 10 minutes). You will have to supply
-  `azure-subscription-id' and `azure-subscription-cert' path. See these
+  Azure for running various Unidata Docker containers. *Replace the
+  environment variables with your choices*. This command will take a few
+  minutes to run (between 5 and 10 minutes). You will have to supply
+  `azure-subscription-id' and `azure-subscription-cert' path. See the
   Azure `docker-machine' [instructions], if you have questions about
-  this process. Also set the size of the VM which is currently set to
-  `ExtraSmall' and supply the name of the Azure Docker host. See [here]
-  to learn more about sizes for virtual machines.
+  this process. Also set [the size of the VM] (e.g., `ExtraSmall',
+  `ExtraLarge') and supply the name of the Azure Docker host.
 
 
   ,----
@@ -179,14 +175,14 @@ _________________
   [instructions]
   https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/
 
-  [here]
+  [the size of the VM]
   https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/
 
 
 3.3 Configure Unix Shell to Interact with New Azure VM.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  Execute the following command `eval' in your local computer shell
+  Execute the following `eval' command on your local computer shell
   environment to ensure that `docker' commands will be run with the
   newly created Docker host.
 
@@ -215,7 +211,7 @@ _________________
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   ,----
-  | docker-machine ssh unidata-server
+  | docker-machine ssh $AZURE_HOST
   `----
 
 
@@ -223,10 +219,7 @@ _________________
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   At the very least, we will need `unzip' on the Azure Docker host.
-
   ,----
-  | set -x 
-  | 
   | # update and install package(s)
   | sudo apt-get -qq update
   | sudo apt-get -qq install unzip
@@ -244,6 +237,10 @@ _________________
   | sudo service docker restart
   `----
 
+  In Unix, when adding a user to a group, it is simply easiest to logout
+  and log back in for this change to be recognized. Do that by exiting
+  the VM and logging back in with `docker-machine ssh' command.
+
 
 3.8 Install `docker-compose' on VM
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -253,7 +250,7 @@ _________________
   (THREDDS Data Manager) and RAMADDA so `docker-compose' is perfect for
   this scenario. Install `docker-compose' on the Azure Docker host.
 
-  "You may have to update version (currently at `1.5.2').
+  You may have to update version (currently at `1.5.2').
 
   ,----
   | # Get docker-compose
@@ -271,10 +268,10 @@ _________________
 4.1 Background
 ~~~~~~~~~~~~~~
 
-  At this point, we have done the preliminary legwork to tackle the next
-  step in this process. We will now want to clone two repositories that
-  will allow us to configure and start running the the LDM, TDS, and
-  RAMADDA. In particular, we will be cloning:
+  We have done the preliminary legwork to tackle the next step in this
+  process. We will now want to clone two repositories that will allow us
+  to configure and start running the the LDM, TDS, and RAMADDA. In
+  particular, we will be cloning:
 
   - [`github.com/Unidata/Unidata-Dockerfiles']
   - [`github.com/Unidata/TdsConfig']
@@ -295,11 +292,11 @@ _________________
   `Dockerfile' is a text file that contains commands to build a Docker
   image containing, for example, a working LDM. These Docker images can
   subsequently be run by `docker' command line tools, or
-  `docker-compose' commands that rely on a `docker-compose.yml' file. A
-  `docker-compose.yml' file is a text file that captures exactly how one
-  or more containers run including directory mappings (from outside to
-  within the container), port mappings (from outside to within the
-  container), and other information.
+  `docker-compose' commands that rely on a `docker-compose.yml'
+  configuration file. A `docker-compose.yml' file is a text file that
+  captures exactly how one or more containers run including directory
+  mappings (from outside to within the container), port mappings (from
+  outside to within the container), and other information.
 
 
 4.1.2 `TDSConfig'
@@ -424,7 +421,7 @@ _________________
   element is correct. For your own cloud VMs, work with
   `support-idd@unidata.ucar.edu' to devise a correct `hostname' element
   so that LDM statistics get properly reported. Here is an example
-  `hostname' element `unidata-server.azure.unidata.ucar.edu'.
+  `hostname' element: `unidata-server.azure.unidata.ucar.edu'.
 
 
 * 4.3.2.3 `scour.conf'
@@ -463,9 +460,9 @@ _________________
 * 4.3.2.5 Edit `ldmfile.sh'
 
 
-  Open the `etc/TDS/util/ldmfile.sh' file the editor of your choice. As
-  the top of this file indicates, you must edit the `logfile' to suit
-  your needs. Change the
+  Open the `etc/TDS/util/ldmfile.sh' file in the editor of your
+  choice. As the top of this file indicates, you must edit the `logfile'
+  to suit your needs. Change the
 
   ,----
   | logfile=logs/ldm-mcidas.log
@@ -535,11 +532,16 @@ _________________
 
   As alluded to earlier, we will have to set up data volumes so that the
   LDM can write data, and the TDS and RAMADDA can have access to that
-  data. The `/mnt' volume on Azure is a good place to store data. Check
-  with Azure about the assurances Azure makes about the reliability of
-  storing your data there for the long term. For the LDM this should not
-  be too much of a problem, but for RAMADDA you may wish to be careful
-  as there is the potential to lose user data.
+  data. The `/mnt' has lots of space, but the storage is considered
+  *ephemeral* so be careful! Azure makes no effort to backup data on
+  `/mnt'. For the LDM this should not be too much of a problem because
+  real time data is coming in and getting scoured continuously, but for
+  _RAMADDA you may wish to be careful as there is the potential to lose
+  user data_. There is more information about this topic [here].
+
+
+  [here]
+  https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-how-to-attach-disk/
 
 
 5.1 Check Free Disk Space
@@ -586,8 +588,8 @@ _________________
 6 Opening Ports
 ===============
 
-  Ensure these ports are open on the VM where these containers will
-  run. Ask the cloud administrator for these ports to be open.
+  [Ensure these ports are open] on the VM where these containers will
+  run.
 
   ------------------------
    Service  External Port 
@@ -604,6 +606,9 @@ _________________
   the TDS via port 8443 when data have been updated or changed. See
   [here] to learn more about the TDM.
 
+
+  [Ensure these ports are open]
+  https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-set-up-endpoints/
 
   [here]
   https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html
@@ -662,14 +667,11 @@ _________________
 8.0.3 Pull Down Images from the DockerHub Registry
 --------------------------------------------------
 
-  At this point you are almost ready to run the whole kit and
-  caboodle. But first pull the relevant docker images to make this
-  easier for the subsequent `docker-compose' command.
-
+  You are almost ready to run the whole kit and caboodle. But first pull
+  the relevant docker images to make this easier for the subsequent
+  `docker-compose' command.
 
   ,----
-  | set -x
-  | 
   | # Docker pull all relavant images
   | docker pull unidata/ldmtds:latest
   | docker pull unidata/tdm:latest
@@ -694,7 +696,8 @@ _________________
 =======================
 
 
-  At this point, you should have these services running:
+  In this section, we will assume you have created a VM called
+  `unidata-server'.You should have these services running:
 
   - LDM
   - TDS
@@ -725,7 +728,8 @@ _________________
 9.2 TDS and RAMADDA URLs
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-  Verify what you have the TDS and RAMADDA running by navigating to:
+  Verify what you have the TDS and RAMADDA running by, for example,
+  navigating to:
   [http://unidata-server.cloudapp.net/thredds/catalog.html] and
   [http://unidata-server.cloudapp.net:8081/repository]. If you are going
   to RAMADDA for the first time, you will have to do some [RAMADDA set
@@ -777,11 +781,14 @@ _________________
   http://ramadda.org//repository/userguide/developer/filesystem.html
 
 
-10 Common Problems
-==================
+10 Appendix
+===========
 
-10.1 Certificate Regeneration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+10.1 Common Problems
+~~~~~~~~~~~~~~~~~~~~
+
+10.1.1 Certificate Regeneration
+-------------------------------
 
   When using `docker-machine' may see an error message pertaining to
   regenerating certificates. In this case:
