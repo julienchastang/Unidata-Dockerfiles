@@ -467,7 +467,7 @@ Create a `/data` directory where the LDM can write data soft link to the `/mnt` 
     sudo ln -s /mnt /data
     sudo mkdir /mnt/ldm/
     sudo chown -R ubuntu:docker /data/ldm
-    sudo mkdir /mnt/repository/
+    sudo mkdir /home/ubuntu/repository/
     sudo chown -R ubuntu:docker /home/ubuntu/repository
 
 These directories will be used by the LDM, TDS, and RAMADDA docker containers when we mount directories from the Docker host into these containers.

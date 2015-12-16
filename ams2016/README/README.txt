@@ -578,7 +578,7 @@ _________________
   | sudo ln -s /mnt /data
   | sudo mkdir /mnt/ldm/
   | sudo chown -R ubuntu:docker /data/ldm
-  | sudo mkdir /mnt/repository/
+  | sudo mkdir /home/ubuntu/repository/
   | sudo chown -R ubuntu:docker /home/ubuntu/repository
   `----
 
