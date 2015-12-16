@@ -71,11 +71,12 @@
 </li>
 </ul>
 </li>
-<li><a href="#orgheadline46">10. Appendix</a>
+<li><a href="#orgheadline47">10. Appendix</a>
 <ul>
-<li><a href="#orgheadline45">10.1. Common Problems</a>
+<li><a href="#orgheadline46">10.1. Common Problems</a>
 <ul>
 <li><a href="#orgheadline44">10.1.1. Certificate Regeneration</a></li>
+<li><a href="#orgheadline45">10.1.2. Size of Image is not Large Enough</a></li>
 </ul>
 </li>
 </ul>
@@ -121,7 +122,7 @@ The VM we are about to create will be our **Docker Host** from where we will run
 
 <a id="orgtarget1"></a>
 
-The following `docker-machine` command will create a Docker VM on Azure for running various Unidata Docker containers. **Replace the environment variables with your choices**. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply `azure-subscription-id` and `azure-subscription-cert` path. See the Azure `docker-machine` [instructions](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/), if you have questions about this process. Also set  [the size of the VM](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/)  (e.g., `ExtraSmall`, `ExtraLarge`) and supply the name of the Azure Docker host.
+The following `docker-machine` command will create a Docker VM on Azure for running various Unidata Docker containers. **Replace the environment variables with your choices**. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply `azure-subscription-id` and `azure-subscription-cert` path. See the Azure `docker-machine` [instructions](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/), if you have questions about this process. Also set  [the size of the VM](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/)  (e.g., `Small`, `ExtraLarge`) and supply the name of the Azure Docker host.
 
     # Create Azure VM via docker-machine
     docker-machine -D create -d azure \
@@ -659,13 +660,29 @@ In the [IDV Dashboard](https://www.unidata.ucar.edu/software/idv/docs/userguide/
 
 RAMADDA has good integration with the IDV and the two technologies work well together. You may wish to install the [RAMADDA IDV plugin](http://www.unidata.ucar.edu/software/idv/docs/workshop/savingstate/Ramadda.html) to publish IDV bundles to RAMADDA. RAMADDA also has access to the `/data/ldm` directory so you may want to set up [server-side view of this part of the file system](http://ramadda.org//repository/userguide/developer/filesystem.html). Finally,  you can enter this catalog URL in the IDV dashboard to examine data holdings shared bundles, etc. on RAMADDA <http://unidata-server.cloudapp.net:8081/repository?output=thredds.catalog>.
 
-# Appendix<a id="orgheadline46"></a>
+# Appendix<a id="orgheadline47"></a>
 
-## Common Problems<a id="orgheadline45"></a>
+## Common Problems<a id="orgheadline46"></a>
 
 ### Certificate Regeneration<a id="orgheadline44"></a>
 
-When using `docker-machine`  may see an error message pertaining to regenerating certificates. In this case:
+When using `docker-machine`  may see an error message pertaining to regenerating certificates.
+
+    Error running connection boilerplate: Error checking and/or regenerating the certs: There was an error validating certificates for host "host.cloudapp.net:2376": dial tcp 104.40.58.160:2376: i/o timeout
+    You can attempt to regenerate them using 'docker-machine regenerate-certs name'.
+    Be advised that this will trigger a Docker daemon restart which will stop running containers.
+
+In this case:
 
     docker-machine regenerate-certs <azure-host>
     eval "$(docker-machine env <azure-host>)"
+
+Like the error message says, you may need to restart your Docker containers with `docker-compose`, for example.
+
+### Size of Image is not Large Enough<a id="orgheadline45"></a>
+
+If you see your containers not starting or error messages like this:
+
+    ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c45b9d548df4e24: [8] System error: fork/exec /proc/self/exe: cannot allocate memory
+
+it is possible you did not create a sufficiently large VM. Try  [increasing the size of the VM](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/) .

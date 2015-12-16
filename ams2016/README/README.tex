@@ -1,4 +1,4 @@
-% Created 2015-12-15 Tue 23:06
+% Created 2015-12-16 Wed 10:35
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -82,8 +82,7 @@ The VM we are about to create will be our \textbf{Docker Host} from where we wil
 \label{sec:orgheadline4}
 \label{orgtarget1}
 
-
-The following \texttt{docker-machine} command will create a Docker VM on Azure for running various Unidata Docker containers. \textbf{Replace the environment variables with your choices}. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply \texttt{azure-subscription-id} and \texttt{azure-subscription-cert} path. See the Azure \texttt{docker-machine} \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/}{instructions}, if you have questions about this process. Also set  \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/}{the size of the VM}  (e.g., \texttt{ExtraSmall}, \texttt{ExtraLarge}) and supply the name of the Azure Docker host.
+The following \texttt{docker-machine} command will create a Docker VM on Azure for running various Unidata Docker containers. \textbf{Replace the environment variables with your choices}. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply \texttt{azure-subscription-id} and \texttt{azure-subscription-cert} path. See the Azure \texttt{docker-machine} \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/}{instructions}, if you have questions about this process. Also set  \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/}{the size of the VM}  (e.g., \texttt{Small}, \texttt{ExtraLarge}) and supply the name of the Azure Docker host.
 
 
 \begin{verbatim}
@@ -128,6 +127,7 @@ docker-machine ssh $AZURE_HOST
 \label{sec:orgheadline8}
 
 At the very least, we will need \texttt{unzip} on the Azure Docker host.
+
 \begin{verbatim}
 # update and install package(s)
 sudo apt-get -qq update
@@ -520,16 +520,36 @@ RAMADDA has good integration with the IDV and the two technologies work well tog
 
 
 \section{Appendix}
-\label{sec:orgheadline46}
+\label{sec:orgheadline47}
 \subsection{Common Problems}
-\label{sec:orgheadline45}
+\label{sec:orgheadline46}
 \subsubsection{Certificate Regeneration}
 \label{sec:orgheadline44}
 
-When using \texttt{docker-machine}  may see an error message pertaining to regenerating certificates. In this case:
+When using \texttt{docker-machine}  may see an error message pertaining to regenerating certificates.
+
+\begin{verbatim}
+Error running connection boilerplate: Error checking and/or regenerating the certs: There was an error validating certificates for host "host.cloudapp.net:2376": dial tcp 104.40.58.160:2376: i/o timeout
+You can attempt to regenerate them using 'docker-machine regenerate-certs name'.
+Be advised that this will trigger a Docker daemon restart which will stop running containers.
+\end{verbatim}
+
+In this case:
 
 \begin{verbatim}
 docker-machine regenerate-certs <azure-host>
 eval "$(docker-machine env <azure-host>)"
 \end{verbatim}
+
+Like the error message says, you may need to restart your Docker containers with \texttt{docker-compose}, for example.
+\subsubsection{Size of Image is not Large Enough}
+\label{sec:orgheadline45}
+
+If you see your containers not starting or error messages like this:
+
+\begin{verbatim}
+ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c45b9d548df4e24: [8] System error: fork/exec /proc/self/exe: cannot allocate memory
+\end{verbatim}
+
+it is possible you did not create a sufficiently large VM. Try  \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/}{increasing the size of the VM} .
 \end{document}

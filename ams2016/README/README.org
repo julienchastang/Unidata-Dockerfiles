@@ -115,8 +115,7 @@ The VM we are about to create will be our *Docker Host* from where we will run D
 ** Create a VM on Azure.
 <<prelim:azure>>
 
-# Setup unicloud-1.sh
-
+# Setting up unicloud-1.sh for tangling
 #+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh :shebang "#!/bin/bash" :exports none
   set -x 
 
@@ -130,7 +129,7 @@ The VM we are about to create will be our *Docker Host* from where we will run D
   AZURE_HOST=<<myvm>>
   AZURE_ID="3.14"
   AZURE_CERT="/path/to/cert.pm"
-  AZURE_SIZE="ExtraSmall"
+  AZURE_SIZE="ExtraLarge"
 
   while [[ $# > 0 ]]
   do
@@ -161,11 +160,11 @@ The VM we are about to create will be our *Docker Host* from where we will run D
   done
 #+END_SRC
 
-The following =docker-machine= command will create a Docker VM on Azure for running various Unidata Docker containers. *Replace the environment variables with your choices*. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply =azure-subscription-id= and =azure-subscription-cert= path. See the Azure =docker-machine= [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][instructions]], if you have questions about this process. Also set  [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/][the size of the VM]]  (e.g., =ExtraSmall=, =ExtraLarge=) and supply the name of the Azure Docker host.
+The following =docker-machine= command will create a Docker VM on Azure for running various Unidata Docker containers. *Replace the environment variables with your choices*. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply =azure-subscription-id= and =azure-subscription-cert= path. See the Azure =docker-machine= [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/][instructions]], if you have questions about this process. Also set  [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/][the size of the VM]]  (e.g., =Small=, =ExtraLarge=) and supply the name of the Azure Docker host.
 
 # For Babel users, simply run the unicloud-1.sh command from the CL eval the next 3 code blocks. You don't want to execute in buffer, it takes too long.
 
-#+BEGIN_SRC org :noweb yes :dir ~  :eval no :tangle ../unicloud-1.sh :exports code
+#+BEGIN_SRC org :dir ~  :eval no :tangle ../unicloud-1.sh :exports code
 
 # Create Azure VM via docker-machine
 docker-machine -D create -d azure \
@@ -178,7 +177,7 @@ docker-machine -D create -d azure \
 
 Execute the following =eval= command on your local computer shell environment to ensure that =docker= commands will be run with the newly created Docker host.
 
-#+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports code :eval no
+#+BEGIN_SRC org :dir ~ :tangle ../unicloud-1.sh  :exports code :eval no
   # Ensure docker commands will be run with new host
   eval "$(docker-machine env $AZURE_HOST)"
 #+END_SRC
@@ -187,7 +186,7 @@ Execute the following =eval= command on your local computer shell environment to
 
 Mysteriously, when you =ssh= (see next section) into the fresh VM, you are immediately told to restart it so let's preempt that message by doing that now.
 
-#+BEGIN_SRC org :noweb yes :dir ~ :tangle ../unicloud-1.sh  :exports code :eval no
+#+BEGIN_SRC org  :dir ~ :tangle ../unicloud-1.sh  :exports code :eval no
   # immediately restart VM, according to Azure
   docker-machine restart $AZURE_HOST
   # Again, ensure docker commands will be run with new host
@@ -212,10 +211,12 @@ Mysteriously, when you =ssh= (see next section) into the fresh VM, you are immed
 
 ** Install Package(s) with =apt-get=
 
-At the very least, we will need =unzip= on the Azure Docker host.
+# Setup unicloud-2.sh
 #+BEGIN_SRC sh  :results verbatim drawer :exports none :tangle ../unicloud-2.sh :shebang "#!/bin/bash" :eval no
   set -x 
 #+END_SRC
+
+At the very least, we will need =unzip= on the Azure Docker host.
 
 #+BEGIN_SRC sh  :results verbatim drawer :exports code :tangle ../unicloud-2.sh 
   # update and install package(s)
@@ -359,8 +360,8 @@ For your information, and for future reference, there is a =~/git/TdConfig/idd/p
 
  This file has been set up for the AMS 2016 demonstration. Otherwise you would have to edit the =registry.xml= to ensure the =hostname= element is correct. For your own cloud VMs, work with =support-idd@unidata.ucar.edu= to devise a correct =hostname= element so that LDM statistics get properly reported. Here is an example =hostname= element: =unidata-server.azure.unidata.ucar.edu=.
 
+# search for the buffer called registry.xml in your emacs session
  #+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes 
-   ;; search for the buffer called registry.xml in your emacs session
    (find-file "/ubuntu@<<myvm>>:/home/ubuntu/etc/registry.xml")
  #+END_SRC
 
@@ -516,8 +517,8 @@ When you start RAMADDA for the very first time, you must have  a =password.prope
 
 When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the =tdm= tomcat user. Edit the =docker-compose.yml= file and change the =TDM_PW= to =MeIndexer=. This is not as insecure as it would seem since the =tdm= user has few privileges. Optimally, one could change the password hash for the TDM user in the =tomcat-users.xml= file.
 
+# search for the buffer called docker-compose.yml in your emacs session
 #+BEGIN_SRC emacs-lisp :exports none :results silent :noweb yes 
-  ;; search for the buffer called docker-compose.yml in your emacs session
   (find-file "/ubuntu@<<myvm>>:/home/ubuntu/git/Unidata-Dockerfiles/ams2016/docker-compose.yml")
 #+END_SRC
 
@@ -525,6 +526,7 @@ When the TDM communicates to the TDS concerning changes in data it observes with
 
 You are almost ready to run the whole kit and caboodle. But first  pull the relevant docker images to make this easier for the subsequent =docker-compose= command.
 
+# Setting up unicloud-3.sh for tangling
 #+BEGIN_SRC sh :results silent :exports none :eval no :tangle ../unicloud-3.sh :shebang "#!/bin/bash" 
   set -x
 #+END_SRC
@@ -615,10 +617,28 @@ RAMADDA has good integration with the IDV and the two technologies work well tog
 ** Common Problems
 *** Certificate Regeneration
 
- When using =docker-machine=  may see an error message pertaining to regenerating certificates. In this case:
+ When using =docker-machine=  may see an error message pertaining to regenerating certificates.
+
+#+BEGIN_EXAMPLE
+Error running connection boilerplate: Error checking and/or regenerating the certs: There was an error validating certificates for host "host.cloudapp.net:2376": dial tcp 104.40.58.160:2376: i/o timeout
+You can attempt to regenerate them using 'docker-machine regenerate-certs name'.
+Be advised that this will trigger a Docker daemon restart which will stop running containers.
+#+END_EXAMPLE
+
+ In this case:
 
  #+BEGIN_SRC sh :eval no :results none
     docker-machine regenerate-certs <azure-host>
     eval "$(docker-machine env <azure-host>)"
  #+END_SRC
 
+Like the error message says, you may need to restart your Docker containers with =docker-compose=, for example.
+*** Size of Image is not Large Enough
+
+If you see your containers not starting or error messages like this:
+
+#+BEGIN_EXAMPLE
+ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c45b9d548df4e24: [8] System error: fork/exec /proc/self/exe: cannot allocate memory
+#+END_EXAMPLE
+
+it is possible you did not create a sufficiently large VM. Try  [[https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/][increasing the size of the VM]] .

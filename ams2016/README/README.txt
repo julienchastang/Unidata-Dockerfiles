@@ -54,6 +54,7 @@ _________________
 10 Appendix
 .. 10.1 Common Problems
 ..... 10.1.1 Certificate Regeneration
+..... 10.1.2 Size of Image is not Large Enough
 
 
 
@@ -152,14 +153,13 @@ _________________
 
 
 
-
   The following `docker-machine' command will create a Docker VM on
   Azure for running various Unidata Docker containers. *Replace the
   environment variables with your choices*. This command will take a few
   minutes to run (between 5 and 10 minutes). You will have to supply
   `azure-subscription-id' and `azure-subscription-cert' path. See the
   Azure `docker-machine' [instructions], if you have questions about
-  this process. Also set [the size of the VM] (e.g., `ExtraSmall',
+  this process. Also set [the size of the VM] (e.g., `Small',
   `ExtraLarge') and supply the name of the Azure Docker host.
 
 
@@ -219,6 +219,7 @@ _________________
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   At the very least, we will need `unzip' on the Azure Docker host.
+
   ,----
   | # update and install package(s)
   | sudo apt-get -qq update
@@ -791,9 +792,37 @@ _________________
 -------------------------------
 
   When using `docker-machine' may see an error message pertaining to
-  regenerating certificates. In this case:
+  regenerating certificates.
+
+  ,----
+  | Error running connection boilerplate: Error checking and/or regenerating the certs: There was an error validating certificates for host "host.cloudapp.net:2376": dial tcp 104.40.58.160:2376: i/o timeout
+  | You can attempt to regenerate them using 'docker-machine regenerate-certs name'.
+  | Be advised that this will trigger a Docker daemon restart which will stop running containers.
+  `----
+
+  In this case:
 
   ,----
   | docker-machine regenerate-certs <azure-host>
   | eval "$(docker-machine env <azure-host>)"
   `----
+
+  Like the error message says, you may need to restart your Docker
+  containers with `docker-compose', for example.
+
+
+10.1.2 Size of Image is not Large Enough
+----------------------------------------
+
+  If you see your containers not starting or error messages like this:
+
+  ,----
+  | ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c45b9d548df4e24: [8] System error: fork/exec /proc/self/exe: cannot allocate memory
+  `----
+
+  it is possible you did not create a sufficiently large VM. Try
+  [increasing the size of the VM] .
+
+
+  [increasing the size of the VM]
+  https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/

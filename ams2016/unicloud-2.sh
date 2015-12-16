@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x 
+set -x
 
 # update and install package(s)
 sudo apt-get -qq update

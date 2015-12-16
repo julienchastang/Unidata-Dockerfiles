@@ -11,7 +11,7 @@ usage="$(basename "$0") [-h] [--azure-host] [--azure-host] [--azure-subscription
 AZURE_HOST=unidata-server
 AZURE_ID="3.14"
 AZURE_CERT="/path/to/cert.pm"
-AZURE_SIZE="ExtraSmall"
+AZURE_SIZE="ExtraLarge"
 
 while [[ $# > 0 ]]
 do

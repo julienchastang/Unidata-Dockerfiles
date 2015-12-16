@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2015-12-15 Tue 23:06 -->
+<!-- 2015-12-16 Wed 10:35 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>AMS 2016: UniCloud, Docker at Unidata</title>
@@ -226,11 +226,12 @@ for the JavaScript code in this tag.
 </li>
 </ul>
 </li>
-<li><a href="#orgheadline46">10. Appendix</a>
+<li><a href="#orgheadline47">10. Appendix</a>
 <ul>
-<li><a href="#orgheadline45">10.1. Common Problems</a>
+<li><a href="#orgheadline46">10.1. Common Problems</a>
 <ul>
 <li><a href="#orgheadline44">10.1.1. Certificate Regeneration</a></li>
+<li><a href="#orgheadline45">10.1.2. Size of Image is not Large Enough</a></li>
 </ul>
 </li>
 </ul>
@@ -314,9 +315,8 @@ The VM we are about to create will be our <b>Docker Host</b> from where we will 
 <a id="orgtarget1"></a>
 </p>
 
-
 <p>
-The following <code>docker-machine</code> command will create a Docker VM on Azure for running various Unidata Docker containers. <b>Replace the environment variables with your choices</b>. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply <code>azure-subscription-id</code> and <code>azure-subscription-cert</code> path. See the Azure <code>docker-machine</code> <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/">instructions</a>, if you have questions about this process. Also set  <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/">the size of the VM</a>  (e.g., <code>ExtraSmall</code>, <code>ExtraLarge</code>) and supply the name of the Azure Docker host.
+The following <code>docker-machine</code> command will create a Docker VM on Azure for running various Unidata Docker containers. <b>Replace the environment variables with your choices</b>. This command will take a few minutes to run (between 5 and 10 minutes). You will have to supply <code>azure-subscription-id</code> and <code>azure-subscription-cert</code> path. See the Azure <code>docker-machine</code> <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-docker-machine/">instructions</a>, if you have questions about this process. Also set  <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/">the size of the VM</a>  (e.g., <code>Small</code>, <code>ExtraLarge</code>) and supply the name of the Azure Docker host.
 </p>
 
 
@@ -384,6 +384,7 @@ eval "$(docker-machine env $AZURE_HOST)"
 <p>
 At the very least, we will need <code>unzip</code> on the Azure Docker host.
 </p>
+
 <div class="org-src-container">
 
 <pre class="src src-sh"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">update and install package(s)</span>
@@ -1136,17 +1137,27 @@ RAMADDA has good integration with the IDV and the two technologies work well tog
 </div>
 
 
-<div id="outline-container-orgheadline46" class="outline-2">
-<h2 id="orgheadline46"><span class="section-number-2">10</span> Appendix</h2>
+<div id="outline-container-orgheadline47" class="outline-2">
+<h2 id="orgheadline47"><span class="section-number-2">10</span> Appendix</h2>
 <div class="outline-text-2" id="text-10">
-</div><div id="outline-container-orgheadline45" class="outline-3">
-<h3 id="orgheadline45"><span class="section-number-3">10.1</span> Common Problems</h3>
+</div><div id="outline-container-orgheadline46" class="outline-3">
+<h3 id="orgheadline46"><span class="section-number-3">10.1</span> Common Problems</h3>
 <div class="outline-text-3" id="text-10-1">
 </div><div id="outline-container-orgheadline44" class="outline-4">
 <h4 id="orgheadline44"><span class="section-number-4">10.1.1</span> Certificate Regeneration</h4>
 <div class="outline-text-4" id="text-10-1-1">
 <p>
-When using <code>docker-machine</code>  may see an error message pertaining to regenerating certificates. In this case:
+When using <code>docker-machine</code>  may see an error message pertaining to regenerating certificates.
+</p>
+
+<pre class="example">
+Error running connection boilerplate: Error checking and/or regenerating the certs: There was an error validating certificates for host "host.cloudapp.net:2376": dial tcp 104.40.58.160:2376: i/o timeout
+You can attempt to regenerate them using 'docker-machine regenerate-certs name'.
+Be advised that this will trigger a Docker daemon restart which will stop running containers.
+</pre>
+
+<p>
+In this case:
 </p>
 
 <div class="org-src-container">
@@ -1155,6 +1166,26 @@ When using <code>docker-machine</code>  may see an error message pertaining to r
 <span style="color: #006FE0;">eval</span> <span style="color: #008000;">"$(docker-machine env &lt;azure-host&gt;)"</span>
 </pre>
 </div>
+
+<p>
+Like the error message says, you may need to restart your Docker containers with <code>docker-compose</code>, for example.
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline45" class="outline-4">
+<h4 id="orgheadline45"><span class="section-number-4">10.1.2</span> Size of Image is not Large Enough</h4>
+<div class="outline-text-4" id="text-10-1-2">
+<p>
+If you see your containers not starting or error messages like this:
+</p>
+
+<pre class="example">
+ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c45b9d548df4e24: [8] System error: fork/exec /proc/self/exe: cannot allocate memory
+</pre>
+
+<p>
+it is possible you did not create a sufficiently large VM. Try  <a href="https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/">increasing the size of the VM</a> .
+</p>
 </div>
 </div>
 </div>
@@ -1163,7 +1194,7 @@ When using <code>docker-machine</code>  may see an error message pertaining to r
 <div id="postamble" class="status">
 <p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-12-15 Tue&gt;</span></span></p>
 <p class="author">Author: Julien Chastang (UCAR, Unidata)</p>
-<p class="date">Created: 2015-12-15 Tue 23:06</p>
+<p class="date">Created: 2015-12-16 Wed 10:35</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
