@@ -1,4 +1,4 @@
-% Created 2015-12-16 Wed 17:51
+% Created 2015-12-17 Thu 08:49
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -514,16 +514,16 @@ aee044cf8e66 & unidata/tdm:latest & Up & 20 & seconds\\
 If you used the configuration described herein, you will have a \texttt{/data/ldm} directory tree that looks something like this created by the LDM:
 
 \begin{verbatim}
-tree --charset=utf-8  -L 3  /data/ldm -d -I '*2015*|*2016*|current'
+tree --charset=ASCII  -L 3  /data/ldm -d -I '*2015*|*2016*|current'
 \end{verbatim}
 
 \begin{verbatim}
 /data/ldm
-└── pub
-    └── native
-        ├── grid
-        ├── radar
-        └── satellite
+`-- pub
+    `-- native
+        |-- grid
+        |-- radar
+        `-- satellite
 
 5 directories
 \end{verbatim}

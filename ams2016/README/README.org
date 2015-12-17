@@ -417,7 +417,7 @@ The LDM operates on a push data model. You will have to find someone who will ag
 
 The =catalog.xml= files for TDS configuration are contained within the =~/tdsconfig= directory. Search for all files terminating in =.xml= in that directory. Edit the =xml= files for what data you wish to server. See the [[http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/index.html][TDS Documentation]] for more information on editing these XML files.
 
-  Let's see what is available in the =~/tdsconfig= directory.
+Let's see what is available in the =~/tdsconfig= directory.
 
 #+BEGIN_SRC sh :results org :exports both 
   find ~/tdsconfig -type f -name "*.xml"
@@ -601,16 +601,16 @@ From the shell where you started =docker-machine= earlier you can execute the fo
 If you used the configuration described herein, you will have a =/data/ldm= directory tree that looks something like this created by the LDM:
 
 #+BEGIN_SRC sh :results verbatim  :exports both
-tree --charset=utf-8  -L 3  /data/ldm -d -I '*2015*|*2016*|current' 
+tree --charset=ASCII  -L 3  /data/ldm -d -I '*2015*|*2016*|current' 
 #+END_SRC
 
 #+RESULTS:
 : /data/ldm
-: └── pub
-:     └── native
-:         ├── grid
-:         ├── radar
-:         └── satellite
+: `-- pub
+:     `-- native
+:         |-- grid
+:         |-- radar
+:         `-- satellite
 : 
 : 5 directories
 

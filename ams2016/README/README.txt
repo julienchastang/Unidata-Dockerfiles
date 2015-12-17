@@ -743,16 +743,16 @@ _________________
   the LDM:
 
   ,----
-  | tree --charset=utf-8  -L 3  /data/ldm -d -I '*2015*|*2016*|current'
+  | tree --charset=ASCII  -L 3  /data/ldm -d -I '*2015*|*2016*|current'
   `----
 
   ,----
   | /data/ldm
-  | └── pub
-  |     └── native
-  |         ├── grid
-  |         ├── radar
-  |         └── satellite
+  | `-- pub
+  |     `-- native
+  |         |-- grid
+  |         |-- radar
+  |         `-- satellite
   | 
   | 5 directories
   `----
