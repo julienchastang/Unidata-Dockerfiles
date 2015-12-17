@@ -34,7 +34,7 @@
 </li>
 <li><a href="#orgheadline26">4.4. Configuring the TDS</a>
 <ul>
-<li><a href="#orgheadline25">4.4.1. Edit TDS catalog.xml Files</a></li>
+<li><a href="#orgheadline25">4.4.1. Edit TDS <code>catalog.xml</code> Files</a></li>
 </ul>
 </li>
 </ul>
@@ -78,7 +78,7 @@
 <ul>
 <li><a href="#orgheadline45">10.1.1. Certificate Regeneration</a></li>
 <li><a href="#orgheadline46">10.1.2. Size of Image is not Large Enough</a></li>
-<li><a href="#orgheadline47">10.1.3. Finicky TDM</a></li>
+<li><a href="#orgheadline47">10.1.3. Where is my Data and the Finicky TDM</a></li>
 </ul>
 </li>
 </ul>
@@ -302,7 +302,7 @@ The LDM operates on a push data model. You will have to find someone who will ag
 
 ## Configuring the TDS<a id="orgheadline26"></a>
 
-### Edit TDS catalog.xml Files<a id="orgheadline25"></a>
+### Edit TDS `catalog.xml` Files<a id="orgheadline25"></a>
 
 The `catalog.xml` files for TDS configuration are contained within the `~/tdsconfig` directory. Search for all files terminating in `.xml` in that directory. Edit the `xml` files for what data you wish to server. See the [TDS Documentation](http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/index.html) for more information on editing these XML files.
 
@@ -744,12 +744,15 @@ If you see your containers not starting or error messages like this:
 
 it is possible you did not create a sufficiently large VM. Try  [increasing the size of the VM](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/) .
 
-### <a id="orgtarget6"></a> Finicky TDM<a id="orgheadline47"></a>
+### <a id="orgtarget6"></a> Where is my Data and the Finicky TDM<a id="orgheadline47"></a>
 
-If you are not finding the data you expect to see via the THREDDS catalog.xml tree check the TDM logs in `~/logs/tdm`.Also try restarting the TDM on the Azure Docker host:
+If you are not finding the data you expect to see via the THREDDS `catalog.xml` tree check the TDM logs in `~/logs/tdm`. Also try restarting the containers on the Azure Docker host as directories may have been added by the LDM after TDS/TDM start up which the TDS/TDM apperently does not like:
 
     cd ~/git/Unidata-Dockerfiles/ams2016
-    docker-compose stop tdm
-    docker-compose run -d tdm
+    docker-compose stop
+    docker-compose rm -f
+    # ensure containers are no longer running with
+    docker-compose ps -a
+    docker-compose up -d
 
 You may also just have to **wait**. It can take a few hours for the TDM to catch up to what is going on in the `/data/ldm` directory.

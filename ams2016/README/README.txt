@@ -34,7 +34,7 @@ _________________
 ..... 4.3.2 LDM Configuration Files
 ..... 4.3.3 Upstream Data Feed from Unidata or Elsewhere
 .. 4.4 Configuring the TDS
-..... 4.4.1 Edit TDS catalog.xml Files
+..... 4.4.1 Edit TDS `catalog.xml' Files
 5 Setting up Data Volumes
 .. 5.1 Check Free Disk Space
 .. 5.2 Create `/data' Directory
@@ -56,7 +56,7 @@ _________________
 .. 10.1 Common Problems
 ..... 10.1.1 Certificate Regeneration
 ..... 10.1.2 Size of Image is not Large Enough
-..... 10.1.3 Finicky TDM
+..... 10.1.3 Where is my Data and the Finicky TDM
 
 
 
@@ -495,8 +495,8 @@ _________________
 4.4 Configuring the TDS
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-4.4.1 Edit TDS catalog.xml Files
---------------------------------
+4.4.1 Edit TDS `catalog.xml' Files
+----------------------------------
 
   The `catalog.xml' files for TDS configuration are contained within the
   `~/tdsconfig' directory. Search for all files terminating in `.xml' in
@@ -899,17 +899,22 @@ _________________
   https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/
 
 
-10.1.3 Finicky TDM
-------------------
+10.1.3 Where is my Data and the Finicky TDM
+-------------------------------------------
 
   If you are not finding the data you expect to see via the THREDDS
-  catalog.xml tree check the TDM logs in `~/logs/tdm'.Also try
-  restarting the TDM on the Azure Docker host:
+  `catalog.xml' tree check the TDM logs in `~/logs/tdm'. Also try
+  restarting the containers on the Azure Docker host as directories may
+  have been added by the LDM after TDS/TDM start up which the TDS/TDM
+  apperently does not like:
 
   ,----
   | cd ~/git/Unidata-Dockerfiles/ams2016
-  | docker-compose stop tdm
-  | docker-compose run -d tdm
+  | docker-compose stop
+  | docker-compose rm -f
+  | # ensure containers are no longer running with
+  | docker-compose ps -a
+  | docker-compose up -d
   `----
 
   You may also just have to *wait*. It can take a few hours for the TDM

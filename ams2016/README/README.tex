@@ -1,4 +1,4 @@
-% Created 2015-12-16 Wed 17:13
+% Created 2015-12-16 Wed 17:35
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -327,7 +327,7 @@ The LDM operates on a push data model. You will have to find someone who will ag
 
 \subsection{Configuring the TDS}
 \label{sec:orgheadline26}
-\subsubsection{Edit TDS catalog.xml Files}
+\subsubsection{Edit TDS \texttt{catalog.xml} Files}
 \label{sec:orgheadline25}
 
 The \texttt{catalog.xml} files for TDS configuration are contained within the \texttt{\textasciitilde{}/tdsconfig} directory. Search for all files terminating in \texttt{.xml} in that directory. Edit the \texttt{xml} files for what data you wish to server. See the \href{http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/index.html}{TDS Documentation} for more information on editing these XML files.
@@ -619,15 +619,18 @@ ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c
 \end{verbatim}
 
 it is possible you did not create a sufficiently large VM. Try  \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/}{increasing the size of the VM} .
-\subsubsection{\label{orgtarget6} Finicky TDM}
+\subsubsection{\label{orgtarget6} Where is my Data and the Finicky TDM}
 \label{sec:orgheadline47}
 
-If you are not finding the data you expect to see via the THREDDS catalog.xml tree check the TDM logs in \texttt{\textasciitilde{}/logs/tdm}.Also try restarting the TDM on the Azure Docker host:
+If you are not finding the data you expect to see via the THREDDS \texttt{catalog.xml} tree check the TDM logs in \texttt{\textasciitilde{}/logs/tdm}. Also try restarting the containers on the Azure Docker host as directories may have been added by the LDM after TDS/TDM start up which the TDS/TDM apperently does not like:
 
 \begin{verbatim}
 cd ~/git/Unidata-Dockerfiles/ams2016
-docker-compose stop tdm
-docker-compose run -d tdm
+docker-compose stop
+docker-compose rm -f
+# ensure containers are no longer running with
+docker-compose ps -a
+docker-compose up -d
 \end{verbatim}
 
 You may also just have to \textbf{wait}. It can take a few hours for the TDM to catch up to what is going on in the \texttt{/data/ldm} directory.
