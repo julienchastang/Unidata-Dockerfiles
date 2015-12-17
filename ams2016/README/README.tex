@@ -1,4 +1,4 @@
-% Created 2015-12-16 Wed 13:20
+% Created 2015-12-16 Wed 17:13
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -72,11 +72,12 @@ Finally,
 \item \texttt{ssh} into new Docker host with  \texttt{docker-machine ssh <azure-host>}
 \item \hyperref[orgtarget2]{Edit \texttt{ldmfile.sh}} to correctly handle logging
 \item \hyperref[orgtarget3]{Edit \texttt{registry.xml}} with the correct \texttt{hostname} element
+\item \hyperref[orgtarget4]{Edit \texttt{\textasciitilde{}git/Unidata-Dockerfiles/ams2016/docker-compose.yml}} with the correct \texttt{TDM\_PW} and \texttt{TDS\_HOST}.
 \item Run \texttt{\textasciitilde{}/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh}
-\item \hyperref[orgtarget4]{Check} your setup
+\item \hyperref[orgtarget5]{Check} your setup
 \end{itemize}
 
-\section{Preliminary Setup on Azure}
+\section{Start of Long Form Instructions and Preliminary Setup on Azure}
 \label{sec:orgheadline11}
 
 The VM we are about to create will be our \textbf{Docker Host} from where we will run Docker containers for the LDM, TDS, and RAMADDA.
@@ -134,12 +135,12 @@ docker-machine ssh $AZURE_HOST
 \subsection{Install Package(s) with \texttt{apt-get}}
 \label{sec:orgheadline8}
 
-At the very least, we will need \texttt{unzip} on the Azure Docker host.
+At the very least, we will need \texttt{unzip} on the Azure Docker host. The Unix \texttt{tree} command can also be handy.
 
 \begin{verbatim}
 # update and install package(s)
 sudo apt-get -qq update
-sudo apt-get -qq install unzip
+sudo apt-get -qq install unzip tree
 \end{verbatim}
 
 \subsection{Add \texttt{ubuntu} User to \texttt{docker} Group and Restart Docker}
@@ -413,13 +414,14 @@ TDS & 8080\\
 RAMADDA & 8081\\
 SSL TDM & 8443\\
 LDM & 388\\
+ADDE & 112\\
 \hline
 \end{tabular}
 \end{center}
 
-Note the TDM is an application that works in conjunction with the TDS. It creates indexes for GRIB data in the background, and notifies the TDS via port 8443 when data have been updated or changed. See \href{https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html}{here} to learn more about the TDM.
+Note the TDM is an application that works in conjunction with the TDS. It creates indexes for GRIB data in the background, and notifies the TDS via port 8443 when data have been updated or changed. See \href{https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html}{here} to learn more about the TDM. The ADDE port is for future use since we have not dockerized ADDE, yet.
 
-\section{Tomcat Logging for TDS and RAMADDA}
+\section{Tomcat Logging for TDS/TDM and RAMADDA}
 \label{sec:orgheadline32}
 
 It is a good idea to mount Tomcat logging directories outside the container so that they can be managed for both the TDS and RAMADDA.
@@ -428,6 +430,7 @@ It is a good idea to mount Tomcat logging directories outside the container so t
 # Create Tomcat logging directories
 mkdir -p ~/logs/ramadda-tomcat
 mkdir -p ~/logs/tds-tomcat
+mkdir -p ~/logs/tdm
 \end{verbatim}
 
 Note there is also a logging directory in \texttt{\textasciitilde{}/tdsconfig/logs}. All these logging directories should be looked at periodically, not the least to ensure that \texttt{log} files are not filling up your system.
@@ -444,10 +447,10 @@ When you start RAMADDA for the very first time, you must have  a \texttt{passwor
 echo ramadda.install.password=changeme! > /home/ubuntu/repository/pw.properties
 \end{verbatim}
 
-\subsubsection{Final Edit to \texttt{docker-compose.yml}}
+\subsubsection{\label{orgtarget4} Final Edit to \texttt{docker-compose.yml}}
 \label{sec:orgheadline34}
 
-When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the \texttt{tdm} tomcat user. Edit the \texttt{docker-compose.yml} file and change the \texttt{TDM\_PW} to \texttt{MeIndexer}. This is not as insecure as it would seem since the \texttt{tdm} user has few privileges. Optimally, one could change the password hash for the TDM user in the \texttt{tomcat-users.xml} file.
+When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the \texttt{tdm} tomcat user. Edit the \texttt{docker-compose.yml} file and change the \texttt{TDM\_PW} to \texttt{MeIndexer}. This is not as insecure as it would seem since the \texttt{tdm} user has few privileges. Optimally, one could change the password hash for the TDM user in the \texttt{tomcat-users.xml} file. Also endure \texttt{TDS\_HOST} is pointing to the correct Azure Docker host (e.g., \texttt{http://unidata-server.cloudapp.net}).
 
 \subsubsection{Pull Down Images from the DockerHub Registry}
 \label{sec:orgheadline35}
@@ -472,8 +475,8 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
 docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 \end{verbatim}
 
-\section{\label{orgtarget4} Check What is Running}
-\label{sec:orgheadline43}
+\section{\label{orgtarget5} Check What is Running}
+\label{sec:orgheadline44}
 
 In this section, we will assume you have created a VM called \texttt{unidata-server}.You should have these services running:
 
@@ -505,34 +508,90 @@ aee044cf8e66 & unidata/tdm:latest & Up & 20 & seconds\\
 \end{tabular}
 \end{center}
 
+\subsection{Checking Data Directory}
+\label{sec:orgheadline39}
+
+If you used the configuration described herein, you will have a \texttt{/data/ldm} directory tree that looks something like this created by the LDM:
+
+\begin{verbatim}
+tree --charset=utf-8  -L 3  /data/ldm -d -I '*2015*|*2016*|current'
+\end{verbatim}
+
+\begin{verbatim}
+/data/ldm
+└── pub
+    └── native
+        ├── grid
+        ├── radar
+        └── satellite
+
+5 directories
+\end{verbatim}
+
+Poke around for grib2 data.
+
+\begin{verbatim}
+find /data/ldm -name *.grib2 | awk 'BEGIN { FS = "/" } ; { print $NF }' | head
+\end{verbatim}
+
+\begin{verbatim}
+RR_CONUS_13km_20151216_2200.grib2
+RR_CONUS_13km_20151216_2100.grib2
+RR_CONUS_13km_20151216_2000.grib2
+RR_CONUS_13km_20151216_2300.grib2
+GFS_Global_onedeg_20151216_1800.grib2
+Level3_Composite_N0R_20151217_0000.grib2
+Level3_Composite_N0R_20151217_0005.grib2
+Level3_Composite_N0R_20151217_0010.grib2
+Level3_Composite_N0R_20151216_2155.grib2
+Level3_Composite_N0R_20151216_2315.grib2
+\end{verbatim}
+
+Search for GRIB index files (\texttt{gbx9}). If you do not see them, see the section about a \hyperref[orgtarget6]{finicky TDM} in the in the Appendix.
+
+\begin{verbatim}
+find /data/ldm -name *.gbx9 | awk 'BEGIN { FS = "/" } ; { print $NF }' | head
+\end{verbatim}
+
+\begin{verbatim}
+RR_CONUS_13km_20151216_2200.grib2.gbx9
+RR_CONUS_13km_20151216_2300.grib2.gbx9
+RR_CONUS_13km_20151216_2100.grib2.gbx9
+RR_CONUS_13km_20151216_2000.grib2.gbx9
+GFS_Global_onedeg_20151216_1800.grib2.gbx9
+Level3_Composite_N0R_20151217_0005.grib2.gbx9
+Level3_Composite_N0R_20151217_0000.grib2.gbx9
+Level3_Composite_N0R_20151216_2205.grib2.gbx9
+Level3_Composite_N0R_20151216_2315.grib2.gbx9
+Level3_Composite_N0R_20151216_2330.grib2.gbx9
+\end{verbatim}
 
 \subsection{TDS and RAMADDA URLs}
-\label{sec:orgheadline39}
+\label{sec:orgheadline40}
 
 Verify what you have the TDS and RAMADDA running by, for example, navigating to: \url{http://unidata-server.cloudapp.net/thredds/catalog.html} and \url{http://unidata-server.cloudapp.net:8081/repository}. If you are going to RAMADDA for the first time, you will have to do some \href{http://ramadda.org//repository/userguide/toc.html}{RAMADDA set up}.
 
 \subsection{Viewing Data with the IDV}
-\label{sec:orgheadline42}
+\label{sec:orgheadline43}
 
 Another way to verify your work is run the \href{https://www.unidata.ucar.edu/software/idv/}{Unidata Integrated Data Viewer}.
 
 \subsubsection{Access TDS with the IDV}
-\label{sec:orgheadline40}
+\label{sec:orgheadline41}
 
 In the \href{https://www.unidata.ucar.edu/software/idv/docs/userguide/data/choosers/CatalogChooser.html}{IDV Dashboard}, you should be able to enter the catalog XML URL: \url{http://unidata-server.cloudapp.net/thredds/catalog.xml}.  
 
 \subsubsection{Access RAMADDAA with the IDV}
-\label{sec:orgheadline41}
+\label{sec:orgheadline42}
 
 RAMADDA has good integration with the IDV and the two technologies work well together. You may wish to install the \href{http://www.unidata.ucar.edu/software/idv/docs/workshop/savingstate/Ramadda.html}{RAMADDA IDV plugin} to publish IDV bundles to RAMADDA. RAMADDA also has access to the \texttt{/data/ldm} directory so you may want to set up \href{http://ramadda.org//repository/userguide/developer/filesystem.html}{server-side view of this part of the file system}. Finally,  you can enter this catalog URL in the IDV dashboard to examine data holdings shared bundles, etc. on RAMADDA \url{http://unidata-server.cloudapp.net:8081/repository?output=thredds.catalog}.
 
-
 \section{Appendix}
-\label{sec:orgheadline47}
+\label{sec:orgheadline49}
 \subsection{Common Problems}
-\label{sec:orgheadline46}
+\label{sec:orgheadline48}
 \subsubsection{Certificate Regeneration}
-\label{sec:orgheadline44}
+\label{sec:orgheadline45}
 
 When using \texttt{docker-machine}  may see an error message pertaining to regenerating certificates.
 
@@ -551,7 +610,7 @@ eval "$(docker-machine env <azure-host>)"
 
 Like the error message says, you may need to restart your Docker containers with \texttt{docker-compose}, for example.
 \subsubsection{Size of Image is not Large Enough}
-\label{sec:orgheadline45}
+\label{sec:orgheadline46}
 
 If you see your containers not starting or error messages like this:
 
@@ -560,4 +619,16 @@ ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c
 \end{verbatim}
 
 it is possible you did not create a sufficiently large VM. Try  \href{https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/}{increasing the size of the VM} .
+\subsubsection{\label{orgtarget6} Finicky TDM}
+\label{sec:orgheadline47}
+
+If you are not finding the data you expect to see via the THREDDS catalog.xml tree check the TDM logs in \texttt{\textasciitilde{}/logs/tdm}.Also try restarting the TDM on the Azure Docker host:
+
+\begin{verbatim}
+cd ~/git/Unidata-Dockerfiles/ams2016
+docker-compose stop tdm
+docker-compose run -d tdm
+\end{verbatim}
+
+You may also just have to \textbf{wait}. It can take a few hours for the TDM to catch up to what is going on in the \texttt{/data/ldm} directory.
 \end{document}

@@ -4,7 +4,7 @@
 <ul>
 <li><a href="#orgheadline1">1. Preamble</a></li>
 <li><a href="#orgheadline2">2. Quick Start</a></li>
-<li><a href="#orgheadline11">3. Preliminary Setup on Azure</a>
+<li><a href="#orgheadline11">3. Start of Long Form Instructions and Preliminary Setup on Azure</a>
 <ul>
 <li><a href="#orgheadline3">3.1. Install <code>docker-machine</code></a></li>
 <li><a href="#orgheadline4">3.2. Create a VM on Azure.</a></li>
@@ -46,7 +46,7 @@
 </ul>
 </li>
 <li><a href="#orgheadline31">6. Opening Ports</a></li>
-<li><a href="#orgheadline32">7. Tomcat Logging for TDS and RAMADDA</a></li>
+<li><a href="#orgheadline32">7. Tomcat Logging for TDS/TDM and RAMADDA</a></li>
 <li><a href="#orgheadline37">8. Starting the LDM TDS RAMADDA TDM</a>
 <ul>
 <li>
@@ -59,24 +59,26 @@
 </li>
 </ul>
 </li>
-<li><a href="#orgheadline43">9. Check What is Running</a>
+<li><a href="#orgheadline44">9. Check What is Running</a>
 <ul>
 <li><a href="#orgheadline38">9.1. Docker Process Status</a></li>
-<li><a href="#orgheadline39">9.2. TDS and RAMADDA URLs</a></li>
-<li><a href="#orgheadline42">9.3. Viewing Data with the IDV</a>
+<li><a href="#orgheadline39">9.2. Checking Data Directory</a></li>
+<li><a href="#orgheadline40">9.3. TDS and RAMADDA URLs</a></li>
+<li><a href="#orgheadline43">9.4. Viewing Data with the IDV</a>
 <ul>
-<li><a href="#orgheadline40">9.3.1. Access TDS with the IDV</a></li>
-<li><a href="#orgheadline41">9.3.2. Access RAMADDAA with the IDV</a></li>
+<li><a href="#orgheadline41">9.4.1. Access TDS with the IDV</a></li>
+<li><a href="#orgheadline42">9.4.2. Access RAMADDAA with the IDV</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgheadline47">10. Appendix</a>
+<li><a href="#orgheadline49">10. Appendix</a>
 <ul>
-<li><a href="#orgheadline46">10.1. Common Problems</a>
+<li><a href="#orgheadline48">10.1. Common Problems</a>
 <ul>
-<li><a href="#orgheadline44">10.1.1. Certificate Regeneration</a></li>
-<li><a href="#orgheadline45">10.1.2. Size of Image is not Large Enough</a></li>
+<li><a href="#orgheadline45">10.1.1. Certificate Regeneration</a></li>
+<li><a href="#orgheadline46">10.1.2. Size of Image is not Large Enough</a></li>
+<li><a href="#orgheadline47">10.1.3. Finicky TDM</a></li>
 </ul>
 </li>
 </ul>
@@ -113,10 +115,11 @@ Finally,
 -   `ssh` into new Docker host with  `docker-machine ssh <azure-host>`
 -   [Edit `ldmfile.sh`](#orgtarget2) to correctly handle logging
 -   [Edit `registry.xml`](#orgtarget3) with the correct `hostname` element
+-   [Edit `~git/Unidata-Dockerfiles/ams2016/docker-compose.yml`](#orgtarget4) with the correct `TDM_PW` and `TDS_HOST`.
 -   Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh`
--   [Check](#orgtarget4) your setup
+-   [Check](#orgtarget5) your setup
 
-# Preliminary Setup on Azure<a id="orgheadline11"></a>
+# Start of Long Form Instructions and Preliminary Setup on Azure<a id="orgheadline11"></a>
 
 The VM we are about to create will be our **Docker Host** from where we will run Docker containers for the LDM, TDS, and RAMADDA.
 
@@ -156,11 +159,11 @@ Mysteriously, when you `ssh` (see next section) into the fresh VM, you are immed
 
 ## Install Package(s) with `apt-get`<a id="orgheadline8"></a>
 
-At the very least, we will need `unzip` on the Azure Docker host.
+At the very least, we will need `unzip` on the Azure Docker host. The Unix `tree` command can also be handy.
 
     # update and install package(s)
     sudo apt-get -qq update
-    sudo apt-get -qq install unzip
+    sudo apt-get -qq install unzip tree
 
 ## Add `ubuntu` User to `docker` Group and Restart Docker<a id="orgheadline9"></a>
 
@@ -523,18 +526,25 @@ These directories will be used by the LDM, TDS, and RAMADDA docker containers wh
 <td class="org-left">LDM</td>
 <td class="org-right">388</td>
 </tr>
+
+
+<tr>
+<td class="org-left">ADDE</td>
+<td class="org-right">112</td>
+</tr>
 </tbody>
 </table>
 
-Note the TDM is an application that works in conjunction with the TDS. It creates indexes for GRIB data in the background, and notifies the TDS via port 8443 when data have been updated or changed. See [here](https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html) to learn more about the TDM.
+Note the TDM is an application that works in conjunction with the TDS. It creates indexes for GRIB data in the background, and notifies the TDS via port 8443 when data have been updated or changed. See [here](https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html) to learn more about the TDM. The ADDE port is for future use since we have not dockerized ADDE, yet.
 
-# Tomcat Logging for TDS and RAMADDA<a id="orgheadline32"></a>
+# Tomcat Logging for TDS/TDM and RAMADDA<a id="orgheadline32"></a>
 
 It is a good idea to mount Tomcat logging directories outside the container so that they can be managed for both the TDS and RAMADDA.
 
     # Create Tomcat logging directories
     mkdir -p ~/logs/ramadda-tomcat
     mkdir -p ~/logs/tds-tomcat
+    mkdir -p ~/logs/tdm
 
 Note there is also a logging directory in `~/tdsconfig/logs`. All these logging directories should be looked at periodically, not the least to ensure that `log` files are not filling up your system.
 
@@ -547,9 +557,9 @@ When you start RAMADDA for the very first time, you must have  a `password.prope
     # Create RAMADDA default password
     echo ramadda.install.password=changeme! > /home/ubuntu/repository/pw.properties
 
-### Final Edit to `docker-compose.yml`<a id="orgheadline34"></a>
+### <a id="orgtarget4"></a> Final Edit to `docker-compose.yml`<a id="orgheadline34"></a>
 
-When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the `tdm` tomcat user. Edit the `docker-compose.yml` file and change the `TDM_PW` to `MeIndexer`. This is not as insecure as it would seem since the `tdm` user has few privileges. Optimally, one could change the password hash for the TDM user in the `tomcat-users.xml` file.
+When the TDM communicates to the TDS concerning changes in data it observes with data supplied by the LDM, it will communicate via the `tdm` tomcat user. Edit the `docker-compose.yml` file and change the `TDM_PW` to `MeIndexer`. This is not as insecure as it would seem since the `tdm` user has few privileges. Optimally, one could change the password hash for the TDM user in the `tomcat-users.xml` file. Also endure `TDS_HOST` is pointing to the correct Azure Docker host (e.g., `http://unidata-server.cloudapp.net`).
 
 ### Pull Down Images from the DockerHub Registry<a id="orgheadline35"></a>
 
@@ -568,7 +578,7 @@ We are now finally ready to start the LDM, TDS, TDM, RAMADDA with the following 
     # Start up all images
     docker-compose -f ~/git/Unidata-Dockerfiles/ams2016/docker-compose.yml up -d
 
-# <a id="orgtarget4"></a> Check What is Running<a id="orgheadline43"></a>
+# <a id="orgtarget5"></a> Check What is Running<a id="orgheadline44"></a>
 
 In this section, we will assume you have created a VM called `unidata-server`.You should have these services running:
 
@@ -646,27 +656,72 @@ From the shell where you started `docker-machine` earlier you can execute the fo
 </tbody>
 </table>
 
-## TDS and RAMADDA URLs<a id="orgheadline39"></a>
+## Checking Data Directory<a id="orgheadline39"></a>
+
+If you used the configuration described herein, you will have a `/data/ldm` directory tree that looks something like this created by the LDM:
+
+    tree --charset=utf-8  -L 3  /data/ldm -d -I '*2015*|*2016*|current'
+
+    /data/ldm
+    └── pub
+        └── native
+            ├── grid
+            ├── radar
+            └── satellite
+    
+    5 directories
+
+Poke around for grib2 data.
+
+    find /data/ldm -name *.grib2 | awk 'BEGIN { FS = "/" } ; { print $NF }' | head
+
+    RR_CONUS_13km_20151216_2200.grib2
+    RR_CONUS_13km_20151216_2100.grib2
+    RR_CONUS_13km_20151216_2000.grib2
+    RR_CONUS_13km_20151216_2300.grib2
+    GFS_Global_onedeg_20151216_1800.grib2
+    Level3_Composite_N0R_20151217_0000.grib2
+    Level3_Composite_N0R_20151217_0005.grib2
+    Level3_Composite_N0R_20151217_0010.grib2
+    Level3_Composite_N0R_20151216_2155.grib2
+    Level3_Composite_N0R_20151216_2315.grib2
+
+Search for GRIB index files (`gbx9`). If you do not see them, see the section about a [finicky TDM](#orgtarget6) in the in the Appendix.
+
+    find /data/ldm -name *.gbx9 | awk 'BEGIN { FS = "/" } ; { print $NF }' | head
+
+    RR_CONUS_13km_20151216_2200.grib2.gbx9
+    RR_CONUS_13km_20151216_2300.grib2.gbx9
+    RR_CONUS_13km_20151216_2100.grib2.gbx9
+    RR_CONUS_13km_20151216_2000.grib2.gbx9
+    GFS_Global_onedeg_20151216_1800.grib2.gbx9
+    Level3_Composite_N0R_20151217_0005.grib2.gbx9
+    Level3_Composite_N0R_20151217_0000.grib2.gbx9
+    Level3_Composite_N0R_20151216_2205.grib2.gbx9
+    Level3_Composite_N0R_20151216_2315.grib2.gbx9
+    Level3_Composite_N0R_20151216_2330.grib2.gbx9
+
+## TDS and RAMADDA URLs<a id="orgheadline40"></a>
 
 Verify what you have the TDS and RAMADDA running by, for example, navigating to: <http://unidata-server.cloudapp.net/thredds/catalog.html> and <http://unidata-server.cloudapp.net:8081/repository>. If you are going to RAMADDA for the first time, you will have to do some [RAMADDA set up](http://ramadda.org//repository/userguide/toc.html).
 
-## Viewing Data with the IDV<a id="orgheadline42"></a>
+## Viewing Data with the IDV<a id="orgheadline43"></a>
 
 Another way to verify your work is run the [Unidata Integrated Data Viewer](https://www.unidata.ucar.edu/software/idv/).
 
-### Access TDS with the IDV<a id="orgheadline40"></a>
+### Access TDS with the IDV<a id="orgheadline41"></a>
 
 In the [IDV Dashboard](https://www.unidata.ucar.edu/software/idv/docs/userguide/data/choosers/CatalogChooser.html), you should be able to enter the catalog XML URL: <http://unidata-server.cloudapp.net/thredds/catalog.xml>.  
 
-### Access RAMADDAA with the IDV<a id="orgheadline41"></a>
+### Access RAMADDAA with the IDV<a id="orgheadline42"></a>
 
 RAMADDA has good integration with the IDV and the two technologies work well together. You may wish to install the [RAMADDA IDV plugin](http://www.unidata.ucar.edu/software/idv/docs/workshop/savingstate/Ramadda.html) to publish IDV bundles to RAMADDA. RAMADDA also has access to the `/data/ldm` directory so you may want to set up [server-side view of this part of the file system](http://ramadda.org//repository/userguide/developer/filesystem.html). Finally,  you can enter this catalog URL in the IDV dashboard to examine data holdings shared bundles, etc. on RAMADDA <http://unidata-server.cloudapp.net:8081/repository?output=thredds.catalog>.
 
-# Appendix<a id="orgheadline47"></a>
+# Appendix<a id="orgheadline49"></a>
 
-## Common Problems<a id="orgheadline46"></a>
+## Common Problems<a id="orgheadline48"></a>
 
-### Certificate Regeneration<a id="orgheadline44"></a>
+### Certificate Regeneration<a id="orgheadline45"></a>
 
 When using `docker-machine`  may see an error message pertaining to regenerating certificates.
 
@@ -681,10 +736,20 @@ In this case:
 
 Like the error message says, you may need to restart your Docker containers with `docker-compose`, for example.
 
-### Size of Image is not Large Enough<a id="orgheadline45"></a>
+### Size of Image is not Large Enough<a id="orgheadline46"></a>
 
 If you see your containers not starting or error messages like this:
 
     ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c45b9d548df4e24: [8] System error: fork/exec /proc/self/exe: cannot allocate memory
 
 it is possible you did not create a sufficiently large VM. Try  [increasing the size of the VM](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/) .
+
+### <a id="orgtarget6"></a> Finicky TDM<a id="orgheadline47"></a>
+
+If you are not finding the data you expect to see via the THREDDS catalog.xml tree check the TDM logs in `~/logs/tdm`.Also try restarting the TDM on the Azure Docker host:
+
+    cd ~/git/Unidata-Dockerfiles/ams2016
+    docker-compose stop tdm
+    docker-compose run -d tdm
+
+You may also just have to **wait**. It can take a few hours for the TDM to catch up to what is going on in the `/data/ldm` directory.

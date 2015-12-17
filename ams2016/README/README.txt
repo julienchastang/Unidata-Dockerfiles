@@ -15,7 +15,7 @@ _________________
 
 1 Preamble
 2 Quick Start
-3 Preliminary Setup on Azure
+3 Start of Long Form Instructions and Preliminary Setup on Azure
 .. 3.1 Install `docker-machine'
 .. 3.2 Create a VM on Azure.
 .. 3.3 Configure Unix Shell to Interact with New Azure VM.
@@ -39,7 +39,7 @@ _________________
 .. 5.1 Check Free Disk Space
 .. 5.2 Create `/data' Directory
 6 Opening Ports
-7 Tomcat Logging for TDS and RAMADDA
+7 Tomcat Logging for TDS/TDM and RAMADDA
 8 Starting the LDM TDS RAMADDA TDM
 ..... 8.0.1 RAMADDA Preconfiguration
 ..... 8.0.2 Final Edit to `docker-compose.yml'
@@ -47,14 +47,16 @@ _________________
 ..... 8.0.4 Start the LDM, TDS, TDM, RAMADDA
 9 Check What is Running
 .. 9.1 Docker Process Status
-.. 9.2 TDS and RAMADDA URLs
-.. 9.3 Viewing Data with the IDV
-..... 9.3.1 Access TDS with the IDV
-..... 9.3.2 Access RAMADDAA with the IDV
+.. 9.2 Checking Data Directory
+.. 9.3 TDS and RAMADDA URLs
+.. 9.4 Viewing Data with the IDV
+..... 9.4.1 Access TDS with the IDV
+..... 9.4.2 Access RAMADDAA with the IDV
 10 Appendix
 .. 10.1 Common Problems
 ..... 10.1.1 Certificate Regeneration
 ..... 10.1.2 Size of Image is not Large Enough
+..... 10.1.3 Finicky TDM
 
 
 
@@ -124,6 +126,8 @@ _________________
   - `ssh' into new Docker host with `docker-machine ssh <azure-host>'
   - Edit `ldmfile.sh' to correctly handle logging
   - Edit `registry.xml' with the correct `hostname' element
+  - Edit `~git/Unidata-Dockerfiles/ams2016/docker-compose.yml' with the
+    correct `TDM_PW' and `TDS_HOST'.
   - Run `~/git/Unidata-Dockerfiles/ams2016/unicloud-3.sh'
   - Check your setup
 
@@ -132,8 +136,8 @@ _________________
   https://docs.docker.com/machine/install-machine/
 
 
-3 Preliminary Setup on Azure
-============================
+3 Start of Long Form Instructions and Preliminary Setup on Azure
+================================================================
 
   The VM we are about to create will be our *Docker Host* from where we
   will run Docker containers for the LDM, TDS, and RAMADDA.
@@ -218,12 +222,13 @@ _________________
 3.6 Install Package(s) with `apt-get'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  At the very least, we will need `unzip' on the Azure Docker host.
+  At the very least, we will need `unzip' on the Azure Docker host. The
+  Unix `tree' command can also be handy.
 
   ,----
   | # update and install package(s)
   | sudo apt-get -qq update
-  | sudo apt-get -qq install unzip
+  | sudo apt-get -qq install unzip tree
   `----
 
 
@@ -600,12 +605,14 @@ _________________
    RAMADDA           8081 
    SSL TDM           8443 
    LDM                388 
+   ADDE               112 
   ------------------------
 
   Note the TDM is an application that works in conjunction with the
   TDS. It creates indexes for GRIB data in the background, and notifies
   the TDS via port 8443 when data have been updated or changed. See
-  [here] to learn more about the TDM.
+  [here] to learn more about the TDM. The ADDE port is for future use
+  since we have not dockerized ADDE, yet.
 
 
   [Ensure these ports are open]
@@ -615,8 +622,8 @@ _________________
   https://www.unidata.ucar.edu/software/thredds/current/tds/reference/collections/TDM.html
 
 
-7 Tomcat Logging for TDS and RAMADDA
-====================================
+7 Tomcat Logging for TDS/TDM and RAMADDA
+========================================
 
   It is a good idea to mount Tomcat logging directories outside the
   container so that they can be managed for both the TDS and RAMADDA.
@@ -625,6 +632,7 @@ _________________
   | # Create Tomcat logging directories
   | mkdir -p ~/logs/ramadda-tomcat
   | mkdir -p ~/logs/tds-tomcat
+  | mkdir -p ~/logs/tdm
   `----
 
   Note there is also a logging directory in `~/tdsconfig/logs'. All
@@ -662,7 +670,9 @@ _________________
   `tdm' tomcat user. Edit the `docker-compose.yml' file and change the
   `TDM_PW' to `MeIndexer'. This is not as insecure as it would seem
   since the `tdm' user has few privileges. Optimally, one could change
-  the password hash for the TDM user in the `tomcat-users.xml' file.
+  the password hash for the TDM user in the `tomcat-users.xml'
+  file. Also endure `TDS_HOST' is pointing to the correct Azure Docker
+  host (e.g., `http://unidata-server.cloudapp.net').
 
 
 8.0.3 Pull Down Images from the DockerHub Registry
@@ -725,7 +735,69 @@ _________________
    4d0208f85b22  unidata/tds:latest      Up         21  seconds 
 
 
-9.2 TDS and RAMADDA URLs
+9.2 Checking Data Directory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  If you used the configuration described herein, you will have a
+  `/data/ldm' directory tree that looks something like this created by
+  the LDM:
+
+  ,----
+  | tree --charset=utf-8  -L 3  /data/ldm -d -I '*2015*|*2016*|current'
+  `----
+
+  ,----
+  | /data/ldm
+  | └── pub
+  |     └── native
+  |         ├── grid
+  |         ├── radar
+  |         └── satellite
+  | 
+  | 5 directories
+  `----
+
+  Poke around for grib2 data.
+
+  ,----
+  | find /data/ldm -name *.grib2 | awk 'BEGIN { FS = "/" } ; { print $NF }' | head
+  `----
+
+  ,----
+  | RR_CONUS_13km_20151216_2200.grib2
+  | RR_CONUS_13km_20151216_2100.grib2
+  | RR_CONUS_13km_20151216_2000.grib2
+  | RR_CONUS_13km_20151216_2300.grib2
+  | GFS_Global_onedeg_20151216_1800.grib2
+  | Level3_Composite_N0R_20151217_0000.grib2
+  | Level3_Composite_N0R_20151217_0005.grib2
+  | Level3_Composite_N0R_20151217_0010.grib2
+  | Level3_Composite_N0R_20151216_2155.grib2
+  | Level3_Composite_N0R_20151216_2315.grib2
+  `----
+
+  Search for GRIB index files (`gbx9'). If you do not see them, see the
+  section about a finicky TDM in the in the Appendix.
+
+  ,----
+  | find /data/ldm -name *.gbx9 | awk 'BEGIN { FS = "/" } ; { print $NF }' | head
+  `----
+
+  ,----
+  | RR_CONUS_13km_20151216_2200.grib2.gbx9
+  | RR_CONUS_13km_20151216_2300.grib2.gbx9
+  | RR_CONUS_13km_20151216_2100.grib2.gbx9
+  | RR_CONUS_13km_20151216_2000.grib2.gbx9
+  | GFS_Global_onedeg_20151216_1800.grib2.gbx9
+  | Level3_Composite_N0R_20151217_0005.grib2.gbx9
+  | Level3_Composite_N0R_20151217_0000.grib2.gbx9
+  | Level3_Composite_N0R_20151216_2205.grib2.gbx9
+  | Level3_Composite_N0R_20151216_2315.grib2.gbx9
+  | Level3_Composite_N0R_20151216_2330.grib2.gbx9
+  `----
+
+
+9.3 TDS and RAMADDA URLs
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
   Verify what you have the TDS and RAMADDA running by, for example,
@@ -739,7 +811,7 @@ _________________
   [RAMADDA set up] http://ramadda.org//repository/userguide/toc.html
 
 
-9.3 Viewing Data with the IDV
+9.4 Viewing Data with the IDV
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   Another way to verify your work is run the [Unidata Integrated Data
@@ -750,7 +822,7 @@ _________________
   https://www.unidata.ucar.edu/software/idv/
 
 
-9.3.1 Access TDS with the IDV
+9.4.1 Access TDS with the IDV
 -----------------------------
 
   In the [IDV Dashboard], you should be able to enter the catalog XML
@@ -761,7 +833,7 @@ _________________
   https://www.unidata.ucar.edu/software/idv/docs/userguide/data/choosers/CatalogChooser.html
 
 
-9.3.2 Access RAMADDAA with the IDV
+9.4.2 Access RAMADDAA with the IDV
 ----------------------------------
 
   RAMADDA has good integration with the IDV and the two technologies
@@ -825,3 +897,20 @@ _________________
 
   [increasing the size of the VM]
   https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/
+
+
+10.1.3 Finicky TDM
+------------------
+
+  If you are not finding the data you expect to see via the THREDDS
+  catalog.xml tree check the TDM logs in `~/logs/tdm'.Also try
+  restarting the TDM on the Azure Docker host:
+
+  ,----
+  | cd ~/git/Unidata-Dockerfiles/ams2016
+  | docker-compose stop tdm
+  | docker-compose run -d tdm
+  `----
+
+  You may also just have to *wait*. It can take a few hours for the TDM
+  to catch up to what is going on in the `/data/ldm' directory.

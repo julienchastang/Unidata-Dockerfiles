@@ -3,7 +3,7 @@ set -x
 
 # update and install package(s)
 sudo apt-get -qq update
-sudo apt-get -qq install unzip
+sudo apt-get -qq install unzip tree
 
 # Add ubuntu to docker group
 sudo usermod -G docker ubuntu
@@ -53,6 +53,7 @@ sudo chown -R ubuntu:docker /home/ubuntu/repository
 # Create Tomcat logging directories
 mkdir -p ~/logs/ramadda-tomcat
 mkdir -p ~/logs/tds-tomcat
+mkdir -p ~/logs/tdm
 
 # Create RAMADDA default password
 echo ramadda.install.password=changeme! > /home/ubuntu/repository/pw.properties

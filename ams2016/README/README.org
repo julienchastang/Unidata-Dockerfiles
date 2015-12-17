@@ -593,242 +593,59 @@ From the shell where you started =docker-machine= earlier you can execute the fo
 
 If you used the configuration described herein, you will have a =/data/ldm= directory tree that looks something like this created by the LDM:
 
-#+BEGIN_SRC sh :results raw drawer :export both
-tree /data/ldm -d -I '*2015*|*2016*|current' 
+#+BEGIN_SRC sh :results verbatim  :exports both
+tree --charset=utf-8  -L 3  /data/ldm -d -I '*2015*|*2016*|current' 
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
-/data/ldm
-`-- pub
-    `-- native
-        |-- grid
-        |   `-- NCEP
-        |       |-- GFS
-        |       |   `-- Global_onedeg
-        |       `-- RR
-        |           `-- CONUS_13km
-        |-- radar
-        |   `-- composite
-        |       |-- gini
-        |       |   |-- dhr
-        |       |   |   `-- 1km
-        |       |   |-- dvl
-        |       |   |   `-- 1km
-        |       |   |-- eet
-        |       |   |   `-- 1km
-        |       |   |-- hhc
-        |       |   |   `-- 1km
-        |       |   |-- n0r
-        |       |   |   `-- 1km
-        |       |   |-- n1p
-        |       |   |   `-- 2km
-        |       |   `-- ntp
-        |       |       `-- 4km
-        |       `-- grib2
-        |           `-- N0R
-        `-- satellite
-            |-- 13.3
-            |   |-- EAST-CONUS_8km
-            |   |-- HI-REGIONAL_8km
-            |   |-- PR-REGIONAL_8km
-            |   `-- WEST-CONUS_8km
-            |-- 3.9
-            |   |-- AK-REGIONAL_8km
-            |   |-- EAST-CONUS_4km
-            |   |-- HI-REGIONAL_4km
-            |   |-- PR-REGIONAL_4km
-            |   `-- WEST-CONUS_4km
-            |-- 40
-            |   |-- EAST-CONUS_1km
-            |   `-- WEST-CONUS_1km
-            |-- 60
-            |   |-- AK-NATIONAL_1km
-            |   |-- HI-NATIONAL_1km
-            |   |-- PR-NATIONAL_1km
-            |   `-- SUPER-NATIONAL_1km
-            |-- CLD
-            |   `-- SUPER-NATIONAL_1km
-            |-- CTP
-            |   `-- SUPER-NATIONAL_1km
-            |-- IR
-            |   |-- AK-NATIONAL_8km
-            |   |-- AK-REGIONAL_8km
-            |   |-- EAST-CONUS_4km
-            |   |-- HI-NATIONAL_14km
-            |   |-- HI-REGIONAL_4km
-            |   |-- NHEM-COMP_24km
-            |   |-- PR-NATIONAL_8km
-            |   |-- PR-REGIONAL_4km
-            |   |-- SUPER-NATIONAL_8km
-            |   `-- WEST-CONUS_4km
-            |-- LI
-            |   `-- SUPER-NATIONAL_1km
-            |-- PRXX
-            |   |-- AK-NATIONAL_1km
-            |   |-- HI-NATIONAL_1km
-            |   |-- PR-NATIONAL_1km
-            |   `-- SUPER-NATIONAL_1km
-            |-- PW
-            |   |-- AK-NATIONAL_1km
-            |   |-- HI-NATIONAL_1km
-            |   |-- PR-NATIONAL_1km
-            |   `-- SUPER-NATIONAL_1km
-            |-- SFC-T
-            |   `-- SUPER-NATIONAL_1km
-            |-- SOUND-11.03
-            |   |-- EAST-CONUS_10km
-            |   |-- HI-NATIONAL_10km
-            |   |-- PR-NATIONAL_10km
-            |   `-- WEST-CONUS_10km
-            |-- SOUND-14.06
-            |   |-- EAST-CONUS_10km
-            |   |-- HI-NATIONAL_10km
-            |   |-- PR-NATIONAL_10km
-            |   `-- WEST-CONUS_10km
-            |-- SOUND-3.98
-            |   |-- EAST-CONUS_10km
-            |   |-- HI-NATIONAL_10km
-            |   |-- PR-NATIONAL_10km
-            |   `-- WEST-CONUS_10km
-            |-- SOUND-4.45
-            |   |-- EAST-CONUS_10km
-            |   |-- HI-NATIONAL_10km
-            |   |-- PR-NATIONAL_10km
-            |   `-- WEST-CONUS_10km
-            |-- SOUND-6.51
-            |   |-- EAST-CONUS_10km
-            |   |-- HI-NATIONAL_10km
-            |   |-- PR-NATIONAL_10km
-            |   `-- WEST-CONUS_10km
-            |-- SOUND-7.02
-            |   |-- EAST-CONUS_10km
-            |   |-- HI-NATIONAL_10km
-            |   |-- PR-NATIONAL_10km
-            |   `-- WEST-CONUS_10km
-            |-- SOUND-7.43
-            |   |-- EAST-CONUS_10km
-            |   |-- HI-NATIONAL_10km
-            |   |-- PR-NATIONAL_10km
-            |   `-- WEST-CONUS_10km
-            |-- SOUND-VIS
-            |   |-- EAST-CONUS_10km
-            |   |-- HI-NATIONAL_10km
-            |   |-- PR-NATIONAL_10km
-            |   `-- WEST-CONUS_10km
-            |-- VIS
-            |   |-- AK-NATIONAL_8km
-            |   |-- AK-REGIONAL_2km
-            |   |-- EAST-CONUS_1km
-            |   |-- HI-NATIONAL_14km
-            |   |-- HI-REGIONAL_1km
-            |   |-- NHEM-COMP_24km
-            |   |-- PR-NATIONAL_8km
-            |   |-- PR-REGIONAL_1km
-            |   |-- SUPER-NATIONAL_8km
-            |   `-- WEST-CONUS_1km
-            `-- WV
-                |-- AK-NATIONAL_8km
-                |-- AK-REGIONAL_8km
-                |-- EAST-CONUS_4km
-                |-- HI-NATIONAL_14km
-                |-- HI-REGIONAL_4km
-                |-- NHEM-COMP_24km
-                |-- PR-NATIONAL_8km
-                |-- PR-REGIONAL_4km
-                |-- SUPER-NATIONAL_8km
-                `-- WEST-CONUS_4km
-
-138 directories
-:END:
+: /data/ldm
+: └── pub
+:     └── native
+:         ├── grid
+:         ├── radar
+:         └── satellite
+: 
+: 5 directories
 
 Poke around for grib2 data.
 
-#+BEGIN_SRC sh :results raw drawer :export both
-find /data/ldm -name *.grib2 | awk 'BEGIN { FS = "/" } ; { print $NF }'
+#+BEGIN_SRC sh :results verbatim  :exports both
+find /data/ldm -name *.grib2 | awk 'BEGIN { FS = "/" } ; { print $NF }' | head
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
+#+begin_example
 RR_CONUS_13km_20151216_2200.grib2
 RR_CONUS_13km_20151216_2100.grib2
 RR_CONUS_13km_20151216_2000.grib2
+RR_CONUS_13km_20151216_2300.grib2
 GFS_Global_onedeg_20151216_1800.grib2
+Level3_Composite_N0R_20151217_0000.grib2
+Level3_Composite_N0R_20151217_0005.grib2
+Level3_Composite_N0R_20151217_0010.grib2
 Level3_Composite_N0R_20151216_2155.grib2
-Level3_Composite_N0R_20151216_2210.grib2
-Level3_Composite_N0R_20151216_2115.grib2
-Level3_Composite_N0R_20151216_2250.grib2
-Level3_Composite_N0R_20151216_2100.grib2
-Level3_Composite_N0R_20151216_2240.grib2
-Level3_Composite_N0R_20151216_2120.grib2
-Level3_Composite_N0R_20151216_2050.grib2
-Level3_Composite_N0R_20151216_2145.grib2
-Level3_Composite_N0R_20151216_2110.grib2
-Level3_Composite_N0R_20151216_2140.grib2
-Level3_Composite_N0R_20151216_2150.grib2
-Level3_Composite_N0R_20151216_2125.grib2
-Level3_Composite_N0R_20151216_2045.grib2
-Level3_Composite_N0R_20151216_2055.grib2
-Level3_Composite_N0R_20151216_2200.grib2
-Level3_Composite_N0R_20151216_2245.grib2
-Level3_Composite_N0R_20151216_2230.grib2
-Level3_Composite_N0R_20151216_2300.grib2
-Level3_Composite_N0R_20151216_2040.grib2
-Level3_Composite_N0R_20151216_2305.grib2
-Level3_Composite_N0R_20151216_2135.grib2
-Level3_Composite_N0R_20151216_2225.grib2
-Level3_Composite_N0R_20151216_2105.grib2
-Level3_Composite_N0R_20151216_2130.grib2
-Level3_Composite_N0R_20151216_2205.grib2
-Level3_Composite_N0R_20151216_2215.grib2
-Level3_Composite_N0R_20151216_2255.grib2
-Level3_Composite_N0R_20151216_2235.grib2
-Level3_Composite_N0R_20151216_2220.grib2
-:END:
+Level3_Composite_N0R_20151216_2315.grib2
+#+end_example
 
 Search for GRIB index files (=gbx9=). If you do not see them, see the section about a [[appendix:tdm][finicky TDM]] in the in the Appendix.
 
-#+BEGIN_SRC sh :results raw drawer :export both
-find /data/ldm -name *.gbx9 | awk 'BEGIN { FS = "/" } ; { print $NF }'
+#+BEGIN_SRC sh :results verbatim  :exports both
+find /data/ldm -name *.gbx9 | awk 'BEGIN { FS = "/" } ; { print $NF }' | head
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
+#+begin_example
 RR_CONUS_13km_20151216_2200.grib2.gbx9
+RR_CONUS_13km_20151216_2300.grib2.gbx9
 RR_CONUS_13km_20151216_2100.grib2.gbx9
 RR_CONUS_13km_20151216_2000.grib2.gbx9
 GFS_Global_onedeg_20151216_1800.grib2.gbx9
+Level3_Composite_N0R_20151217_0005.grib2.gbx9
+Level3_Composite_N0R_20151217_0000.grib2.gbx9
 Level3_Composite_N0R_20151216_2205.grib2.gbx9
-Level3_Composite_N0R_20151216_2145.grib2.gbx9
-Level3_Composite_N0R_20151216_2305.grib2.gbx9
-Level3_Composite_N0R_20151216_2040.grib2.gbx9
-Level3_Composite_N0R_20151216_2215.grib2.gbx9
-Level3_Composite_N0R_20151216_2225.grib2.gbx9
-Level3_Composite_N0R_20151216_2050.grib2.gbx9
-Level3_Composite_N0R_20151216_2300.grib2.gbx9
-Level3_Composite_N0R_20151216_2135.grib2.gbx9
-Level3_Composite_N0R_20151216_2155.grib2.gbx9
-Level3_Composite_N0R_20151216_2130.grib2.gbx9
-Level3_Composite_N0R_20151216_2240.grib2.gbx9
-Level3_Composite_N0R_20151216_2125.grib2.gbx9
-Level3_Composite_N0R_20151216_2235.grib2.gbx9
-Level3_Composite_N0R_20151216_2200.grib2.gbx9
-Level3_Composite_N0R_20151216_2250.grib2.gbx9
-Level3_Composite_N0R_20151216_2055.grib2.gbx9
-Level3_Composite_N0R_20151216_2110.grib2.gbx9
-Level3_Composite_N0R_20151216_2150.grib2.gbx9
-Level3_Composite_N0R_20151216_2115.grib2.gbx9
-Level3_Composite_N0R_20151216_2105.grib2.gbx9
-Level3_Composite_N0R_20151216_2245.grib2.gbx9
-Level3_Composite_N0R_20151216_2220.grib2.gbx9
-Level3_Composite_N0R_20151216_2140.grib2.gbx9
-Level3_Composite_N0R_20151216_2100.grib2.gbx9
-Level3_Composite_N0R_20151216_2255.grib2.gbx9
-Level3_Composite_N0R_20151216_2045.grib2.gbx9
-Level3_Composite_N0R_20151216_2120.grib2.gbx9
-Level3_Composite_N0R_20151216_2210.grib2.gbx9
-Level3_Composite_N0R_20151216_2230.grib2.gbx9
-:END:
+Level3_Composite_N0R_20151216_2315.grib2.gbx9
+Level3_Composite_N0R_20151216_2330.grib2.gbx9
+#+end_example
 
 ** TDS and RAMADDA URLs
 
