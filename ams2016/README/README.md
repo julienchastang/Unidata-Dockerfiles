@@ -77,7 +77,7 @@
 <li><a href="#orgheadline48">10.1. Common Problems</a>
 <ul>
 <li><a href="#orgheadline45">10.1.1. Certificate Regeneration</a></li>
-<li><a href="#orgheadline46">10.1.2. Size of Image is not Large Enough</a></li>
+<li><a href="#orgheadline46">10.1.2. Size of VM is not Large Enough</a></li>
 <li><a href="#orgheadline47">10.1.3. Where is my Data and the Finicky TDM</a></li>
 </ul>
 </li>
@@ -90,11 +90,11 @@
 
 # Preamble<a id="orgheadline1"></a>
 
-This guide describes how to configure the [LDM](http://www.unidata.ucar.edu/software/ldm/), [TDS](http://www.unidata.ucar.edu/software/thredds/current/tds/), and [RAMADDA](http://sourceforge.net/projects/ramadda/) on a [Microsoft Azure VM](https://azure.microsoft.com). The document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also require familiarity with Unix, Docker, and Unidata technology in general. You must have `sudo` priviliges on the Azure host which will hopefully be available you. You must be comfortable entering commands at the Unix command line. We will be using Docker images defined at the [Unidata-Dockerfiles repository](https://github.com/Unidata/Unidata-Dockerfiles) in addition to a configuration specifically planned for an [AMS 2016 demonstrations  project](https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016).
+This guide describes how to configure the [LDM](http://www.unidata.ucar.edu/software/ldm/), [TDS](http://www.unidata.ucar.edu/software/thredds/current/tds/), and [RAMADDA](http://sourceforge.net/projects/ramadda/) on a [Microsoft Azure VM](https://azure.microsoft.com). The document assumes you have access to Azure resources though these instructions should be fairly similar on other cloud providers (e.g., Amazon). They also require familiarity with Unix, Docker, and Unidata technology in general. You must have `sudo` privileges on the Azure host which will hopefully be available you. You must be comfortable entering commands at the Unix command line. We will be using Docker images defined at the [Unidata-Dockerfiles repository](https://github.com/Unidata/Unidata-Dockerfiles) in addition to a configuration specifically planned for an [AMS 2016 demonstrations  project](https://github.com/Unidata/Unidata-Dockerfiles/tree/master/ams2016).
 
 # Quick Start<a id="orgheadline2"></a>
 
-In order to best understand this configuratation process, it is recommmended to read the complete contents of this document and follow the instructions starting in the next section. If there are problems you will be able to reason about the errors. However, if you are eager to get started, you can follow this quick start section.
+In order to best understand this configuration process, it is recommended to read the complete contents of this document and follow the instructions starting in the next section. If there are problems you will be able to reason about the errors. However, if you are eager to get started, you can follow this quick start section.
 
 -   `git clone https://github.com/Unidata/Unidata-Dockerfiles`
 -   [Download and install](https://docs.docker.com/machine/install-machine/) `docker-machine`
@@ -736,9 +736,9 @@ In this case:
 
 Like the error message says, you may need to restart your Docker containers with `docker-compose`, for example.
 
-### Size of Image is not Large Enough<a id="orgheadline46"></a>
+### Size of VM is not Large Enough<a id="orgheadline46"></a>
 
-If you see your containers not starting or error messages like this:
+If you see your containers not starting on Azure or error messages like this:
 
     ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c45b9d548df4e24: [8] System error: fork/exec /proc/self/exe: cannot allocate memory
 
@@ -746,7 +746,7 @@ it is possible you did not create a sufficiently large VM. Try  [increasing the 
 
 ### <a id="orgtarget6"></a> Where is my Data and the Finicky TDM<a id="orgheadline47"></a>
 
-If you are not finding the data you expect to see via the THREDDS `catalog.xml` tree check the TDM logs in `~/logs/tdm`. Also try restarting the containers on the Azure Docker host as directories may have been added by the LDM after TDS/TDM start up which the TDS/TDM apperently does not like:
+If you are not finding the data you expect to see via the THREDDS `catalog.xml` tree check the TDM logs in `~/logs/tdm`. Also try restarting the containers on the Azure Docker host as directories may have been added by the LDM after TDS/TDM start up which the TDS/TDM apparently does not like:
 
     cd ~/git/Unidata-Dockerfiles/ams2016
     docker-compose stop

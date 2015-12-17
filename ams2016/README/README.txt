@@ -55,7 +55,7 @@ _________________
 10 Appendix
 .. 10.1 Common Problems
 ..... 10.1.1 Certificate Regeneration
-..... 10.1.2 Size of Image is not Large Enough
+..... 10.1.2 Size of VM is not Large Enough
 ..... 10.1.3 Where is my Data and the Finicky TDM
 
 
@@ -70,7 +70,7 @@ _________________
   Azure resources though these instructions should be fairly similar on
   other cloud providers (e.g., Amazon). They also require familiarity
   with Unix, Docker, and Unidata technology in general. You must have
-  `sudo' priviliges on the Azure host which will hopefully be available
+  `sudo' privileges on the Azure host which will hopefully be available
   you. You must be comfortable entering commands at the Unix command
   line. We will be using Docker images defined at the
   [Unidata-Dockerfiles repository] in addition to a configuration
@@ -95,8 +95,8 @@ _________________
 2 Quick Start
 =============
 
-  In order to best understand this configuratation process, it is
-  recommmended to read the complete contents of this document and follow
+  In order to best understand this configuration process, it is
+  recommended to read the complete contents of this document and follow
   the instructions starting in the next section. If there are problems
   you will be able to reason about the errors. However, if you are eager
   to get started, you can follow this quick start section.
@@ -882,10 +882,11 @@ _________________
   containers with `docker-compose', for example.
 
 
-10.1.2 Size of Image is not Large Enough
-----------------------------------------
+10.1.2 Size of VM is not Large Enough
+-------------------------------------
 
-  If you see your containers not starting or error messages like this:
+  If you see your containers not starting on Azure or error messages
+  like this:
 
   ,----
   | ERROR: Cannot start container ef229d1753b24b484687ac4d6b8a9f3b961f2981057c59266c45b9d548df4e24: [8] System error: fork/exec /proc/self/exe: cannot allocate memory
@@ -906,7 +907,7 @@ _________________
   `catalog.xml' tree check the TDM logs in `~/logs/tdm'. Also try
   restarting the containers on the Azure Docker host as directories may
   have been added by the LDM after TDS/TDM start up which the TDS/TDM
-  apperently does not like:
+  apparently does not like:
 
   ,----
   | cd ~/git/Unidata-Dockerfiles/ams2016
